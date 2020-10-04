@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using ContactsApi.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ContactsApi.Models;
@@ -16,24 +12,16 @@ namespace ContactsApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ContactsController : ControllerBase
+    public class ContactsController : BaseController
     {
         private readonly ContactContext _context;
-        private readonly ApplicationDbContext _applicationDbContext;
+        
 
-        public ContactsController(ContactContext context, ApplicationDbContext applicationDbContext)
+        public ContactsController(ContactContext context, ApplicationDbContext applicationDbContext) : base(applicationDbContext)
         {
             _context = context;
-            _applicationDbContext = applicationDbContext;
-        }
-
-        private string GetCurrentUser()
-        {
-            var identity = User.Identity as ClaimsIdentity;
-            Claim identityClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-
-            return _applicationDbContext.Users.FirstOrDefault(u => u.Id == identityClaim.Value)?.Id;
-        }
+        } 
+        
 
         // GET: api/Contacts
         [HttpGet]
@@ -41,6 +29,28 @@ namespace ContactsApi.Controllers
         {
             var userId = GetCurrentUser();
             return await _context.Contacts.Where(c => c.UserId == userId).ToListAsync();
+        }
+
+        // GET: api/Contacts
+        [HttpGet("/GetContactSkills")]
+        public async Task<ActionResult<Dictionary<string, string>>> GetContactSkills(int contactId)
+        {
+            var userId = GetCurrentUser();
+            var contact = await _context.Contacts.Where(c=>c.Id == contactId && c.UserId == userId)
+                                        .Include(x=>x.ContactSkills)
+                                        .ThenInclude(x=>x.Skill)
+                                        .FirstOrDefaultAsync();
+            if (contact == null)
+            {
+                return BadRequest("Invalid contact");
+            }
+
+            var returnList = new Dictionary<string, string>();
+            contact.ContactSkills.ToList().ForEach(contactSkill =>
+            {
+                returnList.Add(contactSkill.Skill.Name, contactSkill.SkillLevel.ToString());
+            });
+            return returnList;
         }
 
         // GET: api/Contacts/5
