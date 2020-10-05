@@ -21,4 +21,8 @@
     <Folder Include="StartupConfig\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ContactsApi.Data\ContactsApi.Data.csproj" />
+  </ItemGroup>
+
 </Project>

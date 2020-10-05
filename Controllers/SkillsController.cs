@@ -5,7 +5,6 @@ using ContactsApi.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ContactsApi.Models;
-using ContactsApi.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 
 namespace ContactsApi.Controllers
@@ -22,14 +21,12 @@ namespace ContactsApi.Controllers
             _context = context;
         }
 
-        // GET: api/Skills
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Skill>>> GetSkills()
         {
             return await _context.Skills.ToListAsync();
         }
 
-        // GET: api/Skills/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Skill>> GetSkill(int id)
         {
@@ -82,42 +79,39 @@ namespace ContactsApi.Controllers
         public async Task<ActionResult<Skill>> PostSkill(Skill skill)
         {
 
-            _context.Skills.Add(skill);
+            await _context.Skills.AddAsync(skill);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetSkill", new { id = skill.Id }, skill);
         }
 
-        [HttpPost("/addskilltocontact")]
+        [HttpPost("/AddSkillToContact")]
         public async Task<ActionResult<Skill>> AddSkillToContact(int skillId, int contactId, int skillLevel)
         {
-            if (skillLevel < 0 || skillLevel > 2)
-            {
-                return BadRequest("Invalid skill level");
-            }
-
             if (!_context.Skills.Any(x => x.Id == skillId))
             {
                 return BadRequest("Invalid skill");
             }
-           
-            var user = GetCurrentUser();
+            if (!_context.SkillLevels.Any(x => x.Level == skillLevel))
+            {
+                return BadRequest("Invalid skill level");
+            }
             var contact = await _context.Contacts.FindAsync(contactId);
             if (contact == null)
             {
                 return BadRequest("Invalid user");
             }
-
+            var user = GetCurrentUser();
             if (contact.UserId != user)
             {
                 return BadRequest("Invalid user");
             }
-
+            var skillLevelData = await _context.SkillLevels.FirstOrDefaultAsync(x => x.Level == skillLevel);
             var contactSkill = new ContactSkill
             {
                 ContactId = contactId,
                 SkillId = skillId,
-                SkillLevel = (SkillEnum) skillLevel
+                SkillLevel = skillLevelData
             };
             await _context.ContactSkills.AddAsync(contactSkill);
             await _context.SaveChangesAsync();
