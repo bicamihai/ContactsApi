@@ -123,4 +123,31 @@
   <data name="ContactRemoved" xml:space="preserve">
     <value>Contact was removed.</value>
   </data>
+  <data name="ContactSkillCreated" xml:space="preserve">
+    <value>Contact skill was created.</value>
+  </data>
+  <data name="ContactSkillExists" xml:space="preserve">
+    <value>Contact skill already exists.</value>
+  </data>
+  <data name="ContactSkillNotFound" xml:space="preserve">
+    <value>Contact skill was not found.</value>
+  </data>
+  <data name="ContactSkillUpdated" xml:space="preserve">
+    <value>Contact skill was updated.</value>
+  </data>
+  <data name="ContactUpdated" xml:space="preserve">
+    <value>Contact was updated.</value>
+  </data>
+  <data name="SkillLevelNotFound" xml:space="preserve">
+    <value>Skill level was not found.</value>
+  </data>
+  <data name="SkillNotFound" xml:space="preserve">
+    <value>Skill was not found.</value>
+  </data>
+  <data name="SkillRemoved" xml:space="preserve">
+    <value>Skill was removed.</value>
+  </data>
+  <data name="SkillUpdated" xml:space="preserve">
+    <value>Skill was updated.</value>
+  </data>
 </root>

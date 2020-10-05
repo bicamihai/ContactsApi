@@ -77,5 +77,86 @@ namespace ContactsApi {
                 return ResourceManager.GetString("ContactRemoved", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Contact skill was created..
+        /// </summary>
+        public static string ContactSkillCreated {
+            get {
+                return ResourceManager.GetString("ContactSkillCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Contact skill already exists..
+        /// </summary>
+        public static string ContactSkillExists {
+            get {
+                return ResourceManager.GetString("ContactSkillExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Contact skill was not found..
+        /// </summary>
+        public static string ContactSkillNotFound {
+            get {
+                return ResourceManager.GetString("ContactSkillNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Contact skill was updated..
+        /// </summary>
+        public static string ContactSkillUpdated {
+            get {
+                return ResourceManager.GetString("ContactSkillUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Contact was updated..
+        /// </summary>
+        public static string ContactUpdated {
+            get {
+                return ResourceManager.GetString("ContactUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skill level was not found..
+        /// </summary>
+        public static string SkillLevelNotFound {
+            get {
+                return ResourceManager.GetString("SkillLevelNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skill was not found..
+        /// </summary>
+        public static string SkillNotFound {
+            get {
+                return ResourceManager.GetString("SkillNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skill was removed..
+        /// </summary>
+        public static string SkillRemoved {
+            get {
+                return ResourceManager.GetString("SkillRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skill was updated..
+        /// </summary>
+        public static string SkillUpdated {
+            get {
+                return ResourceManager.GetString("SkillUpdated", resourceCulture);
+            }
+        }
     }
 }

@@ -17,20 +17,17 @@ namespace ContactsApi.Controllers
     public class ContactsController : BaseController
     {
         private readonly ContactContext _context;
-        private readonly IMapper _mapper;
 
-
-        public ContactsController(ContactContext context, ApplicationDbContext applicationDbContext, IMapper mapper) : base(applicationDbContext)
+        public ContactsController(ContactContext context, ApplicationDbContext applicationDbContext, IMapper mapper) : base(applicationDbContext, mapper)
         {
             _context = context;
-            _mapper = mapper;
         } 
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
         {
             var contacts = await _context.Contacts.Where(c => c.UserId == CurrentUserId).ToListAsync();
-            var contactsDto = _mapper.Map<IEnumerable<ContactModel>>(contacts);
+            var contactsDto = Mapper.Map<IEnumerable<ContactModel>>(contacts);
             return new ActionResult<IEnumerable<ContactModel>>(contactsDto);
         }
 
@@ -45,10 +42,10 @@ namespace ContactsApi.Controllers
                                         .FirstOrDefaultAsync();
             if (contact == null)
             {
-                return BadRequest("Invalid contact");
+                return BadRequest(Resources.ContactNotFound);
             }
 
-            var returnList = _mapper.Map<IEnumerable<ContactSkillModel>>(contact.ContactSkills);
+            var returnList = Mapper.Map<IEnumerable<ContactSkillModel>>(contact.ContactSkills);
             return new ActionResult<IEnumerable<ContactSkillModel>>(returnList);
         }
 
@@ -60,7 +57,7 @@ namespace ContactsApi.Controllers
             {
                 return NotFound(Resources.ContactNotFound);
             }
-            return new ActionResult<ContactModel>(_mapper.Map<ContactModel>(contact));
+            return new ActionResult<ContactModel>(Mapper.Map<ContactModel>(contact));
         }
 
         [HttpPut]
@@ -72,7 +69,7 @@ namespace ContactsApi.Controllers
                 return BadRequest(Resources.ContactNotFound);
             }
 
-            _mapper.Map(contactModel, contact);
+            Mapper.Map(contactModel, contact);
             try
             {
                 await _context.SaveChangesAsync();
@@ -85,13 +82,13 @@ namespace ContactsApi.Controllers
                 }
                 throw;
             }
-            return Ok();
+            return Ok(Resources.ContactUpdated);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Contact>> PostContact(ContactModel contactModel)
+        public async Task<ActionResult<ContactModel>> PostContact(ContactModel contactModel)
         {
-            var contact = _mapper.Map<Contact>(contactModel);
+            var contact = Mapper.Map<Contact>(contactModel);
             contact.Id = 0;
             contact.UserId = CurrentUserId;
             await _context.Contacts.AddAsync(contact);
@@ -101,7 +98,7 @@ namespace ContactsApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Contact>> DeleteContact(int id)
+        public async Task<ActionResult> DeleteContact(int id)
         {
             var contact = await _context.Contacts.FindAsync(id);
             if (contact == null)
