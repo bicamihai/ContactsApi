@@ -13,11 +13,19 @@ namespace ContactsApi.Controllers
         {
             _applicationDbContext = applicationDbContext;
         }
-        internal string GetCurrentUser()
+        private string GetCurrentUser()
         {
             var identity = User.Identity as ClaimsIdentity;
             var identityClaim = identity?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             return _applicationDbContext.Users.FirstOrDefault(u => u.Id == identityClaim.Value)?.Id;
+        }
+
+        internal string CurrentUserId
+        {
+            get
+            {
+                return GetCurrentUser();
+            }
         }
     }
 }

@@ -101,8 +101,7 @@ namespace ContactsApi.Controllers
             {
                 return BadRequest("Invalid user");
             }
-            var user = GetCurrentUser();
-            if (contact.UserId != user)
+            if (contact.UserId != CurrentUserId)
             {
                 return BadRequest("Invalid user");
             }
