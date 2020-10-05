@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ContactsApi.Data;
+using ContactsApi.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ContactsApi.Models;
 using Microsoft.AspNetCore.Authorization;
 
 namespace ContactsApi.Controllers
@@ -92,7 +92,7 @@ namespace ContactsApi.Controllers
             {
                 return BadRequest("Invalid skill");
             }
-            if (!_context.SkillLevels.Any(x => x.Level == skillLevel))
+            if (!_context.SkillLevels.Any(x => x.LevelCode == skillLevel))
             {
                 return BadRequest("Invalid skill level");
             }
@@ -106,7 +106,7 @@ namespace ContactsApi.Controllers
             {
                 return BadRequest("Invalid user");
             }
-            var skillLevelData = await _context.SkillLevels.FirstOrDefaultAsync(x => x.Level == skillLevel);
+            var skillLevelData = await _context.SkillLevels.FirstOrDefaultAsync(x => x.LevelCode == skillLevel);
             var contactSkill = new ContactSkill
             {
                 ContactId = contactId,

@@ -5,7 +5,6 @@ using ContactsApi.Data;
 using ContactsApi.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ContactsApi.Models;
 using Microsoft.AspNetCore.Authorization;
 
 namespace ContactsApi.Controllers
