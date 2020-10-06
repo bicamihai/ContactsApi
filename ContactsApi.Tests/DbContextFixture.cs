@@ -1,78 +1,78 @@
-﻿using ContactsApi.Data;
+﻿using System;
+using ContactsApi.Data;
 using ContactsApi.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContactsApi.Tests
 {
-    public class DatabasePreparation
+    public class DbContextFixture : IDisposable
     {
         #region contacts
-        public const int DB_CONTACT_FOR_LOGGED_IN_USER = 1;
-        public const int DB_CONTACT_FOR_ANOTHER_USER = 2;
-        public const int DB_CONTACT_NOT_IN_DATABASE = 3;
+        public const int ContactIdForLoggedInUser = 1;
+        public const int ContactIdForNotLoggedInUSer = 2;
+        public const int ContactIdNotInDatabase = 3;
         #endregion
 
         #region users
-        public const string LOGGED_IN_USER_ID = "95d48f31-14df-4a11-bb63-dd64b3d022e7";
-        public const string ANOTHER_USER_ID = "e2caf916-873b-40ab-a8fa-778af6493105";
+        public const string LoggedInUserId = "95d48f31-14df-4a11-bb63-dd64b3d022e7";
+        public const string AnotherUserId = "e2caf916-873b-40ab-a8fa-778af6493105";
         #endregion
 
         #region skills
         public const int DrinkingBeerSkillId = 1;
         public const int RidingBikeSkillId = 2;
         #endregion
-        public static ApplicationDbContext PrepareApplicationDbContext()
+
+        public ApplicationDbContext ApplicationDbContext { get; private set; }
+        public ContactContext ContactContext { get; private set; }
+        public DbContextFixture()
         {
             var applicationDbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
                                        .UseInMemoryDatabase(databaseName: "ContactDatabase")
                                        .Options;
-            var applicationDbContext = new ApplicationDbContext(applicationDbOptions);
-            applicationDbContext.Users.Add(new IdentityUser()
+            ApplicationDbContext = new ApplicationDbContext(applicationDbOptions);
+            ApplicationDbContext.Users.Add(new IdentityUser()
             {
-                Id = LOGGED_IN_USER_ID
+                Id = LoggedInUserId
             });
-            applicationDbContext.Users.Add(new IdentityUser()
+            ApplicationDbContext.Users.Add(new IdentityUser()
             {
-                Id = ANOTHER_USER_ID,
+                Id = AnotherUserId,
             });
-            applicationDbContext.SaveChanges();
-            return applicationDbContext;
-        }
+            ApplicationDbContext.SaveChanges();
 
-        public static ContactContext PrepareContactContext()
-        {
             var contactOptions = new DbContextOptionsBuilder<ContactContext>()
                                  .UseInMemoryDatabase(databaseName: "ContactDatabase")
                                  .Options;
 
-            var contactContext = new ContactContext(contactOptions);
-            contactContext.Contacts.Add(new Contact
+            ContactContext = new ContactContext(contactOptions);
+            ContactContext.Contacts.Add(new Contact
             {
-                Id = DB_CONTACT_FOR_LOGGED_IN_USER,
+                Id = ContactIdForLoggedInUser,
                 FirstName = "Mihai",
                 LastName = "Bica",
                 Address = "B-dul N.Titulescu",
                 Email = "mihai@yahoo.com",
                 MobilePhoneNumber = "+40743123456",
-                UserId = LOGGED_IN_USER_ID
+                UserId = LoggedInUserId
             });
-            contactContext.Contacts.Add(new Contact
+            ContactContext.Contacts.Add(new Contact
             {
-                Id = DB_CONTACT_FOR_ANOTHER_USER,
+                Id = ContactIdForNotLoggedInUSer,
                 FirstName = "Madalina",
                 LastName = "Bica",
                 Address = "Paris",
                 Email = "mihai@yahoo.com",
                 MobilePhoneNumber = "+40743654321",
-                UserId = ANOTHER_USER_ID
+                UserId = AnotherUserId
             });
-            contactContext.Skills.Add(new Skill
+            ContactContext.Skills.Add(new Skill
             {
                 Id = DrinkingBeerSkillId,
                 Name = "DrinkingBeer"
             });
-            contactContext.Skills.Add(new Skill
+            ContactContext.Skills.Add(new Skill
             {
                 Id = RidingBikeSkillId,
                 Name = "RidingBike"
@@ -83,37 +83,39 @@ namespace ContactsApi.Tests
                 LevelDescription = "Noob",
                 LevelCode = 1
             };
-            contactContext.SkillLevels.Add(noobSkilLevel);
+            ContactContext.SkillLevels.Add(noobSkilLevel);
             var intermediateSkillLevel = new SkillLevel
             {
                 Id = 2,
                 LevelDescription = "Intermediate",
                 LevelCode = 2
             };
-            contactContext.SkillLevels.Add(intermediateSkillLevel);
+            ContactContext.SkillLevels.Add(intermediateSkillLevel);
             var advancedSkillLevel = new SkillLevel
             {
                 Id = 3,
                 LevelDescription = "Advanced",
                 LevelCode = 3
             };
-            contactContext.SkillLevels.Add(advancedSkillLevel);
-            contactContext.ContactSkills.Add(new ContactSkill
+            ContactContext.SkillLevels.Add(advancedSkillLevel);
+            ContactContext.ContactSkills.Add(new ContactSkill
             {
-                SkillId = DrinkingBeerSkillId, 
-                ContactId = DB_CONTACT_FOR_LOGGED_IN_USER,
+                SkillId = DrinkingBeerSkillId,
+                ContactId = ContactIdForLoggedInUser,
                 SkillLevel = noobSkilLevel
             });
-            contactContext.ContactSkills.Add(new ContactSkill
+            ContactContext.ContactSkills.Add(new ContactSkill
             {
                 SkillId = RidingBikeSkillId, //RidingBike
-                ContactId = DB_CONTACT_FOR_LOGGED_IN_USER,
+                ContactId = ContactIdForLoggedInUser,
                 SkillLevel = advancedSkillLevel
             });
-            contactContext.SaveChanges();
-
-
-            return contactContext;
+            ContactContext.SaveChanges();
+        }
+        public void Dispose()
+        {
+            ApplicationDbContext.Dispose();
+            ContactContext.Dispose();
         }
     }
 }
