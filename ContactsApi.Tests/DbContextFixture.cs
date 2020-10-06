@@ -10,8 +10,9 @@ namespace ContactsApi.Tests
     {
         #region contacts
         public const int ContactIdForLoggedInUser = 1;
-        public const int ContactIdForNotLoggedInUSer = 2;
+        public const int ContactIdForNotLoggedInUser = 2;
         public const int ContactIdNotInDatabase = 3;
+        public const int ContactIdForPostTest = 4;
         #endregion
 
         #region users
@@ -24,8 +25,11 @@ namespace ContactsApi.Tests
         public const int RidingBikeSkillId = 2;
         #endregion
 
-        public ApplicationDbContext ApplicationDbContext { get; private set; }
-        public ContactContext ContactContext { get; private set; }
+        public ApplicationDbContext ApplicationDbContext { get; }
+        public ContactContext ContactContext { get; }
+
+        
+
         public DbContextFixture()
         {
             var applicationDbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -59,7 +63,7 @@ namespace ContactsApi.Tests
             });
             ContactContext.Contacts.Add(new Contact
             {
-                Id = ContactIdForNotLoggedInUSer,
+                Id = ContactIdForNotLoggedInUser,
                 FirstName = "Madalina",
                 LastName = "Bica",
                 Address = "Paris",

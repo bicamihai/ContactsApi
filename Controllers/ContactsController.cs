@@ -42,7 +42,7 @@ namespace ContactsApi.Controllers
                                         .FirstOrDefaultAsync();
             if (contact == null)
             {
-                return BadRequest(Resources.ContactNotFound);
+                return NotFound(Resources.ContactNotFound);
             }
 
             var returnList = Mapper.Map<IEnumerable<ContactSkillModel>>(contact.ContactSkills);
@@ -66,7 +66,7 @@ namespace ContactsApi.Controllers
             var contact = await _context.Contacts.FindAsync(contactModel.Id);
             if (contact == null || contact.UserId != CurrentUserId)
             {
-                return BadRequest(Resources.ContactNotFound);
+                return NotFound(Resources.ContactNotFound);
             }
 
             Mapper.Map(contactModel, contact);
@@ -93,8 +93,8 @@ namespace ContactsApi.Controllers
             contact.UserId = CurrentUserId;
             await _context.Contacts.AddAsync(contact);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetContact", new { id = contact.Id }, contactModel);
+            contactModel.Id = contact.Id;
+            return CreatedAtAction("GetContact", contactModel);
         }
 
         [HttpDelete("{id}")]
