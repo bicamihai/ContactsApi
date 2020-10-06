@@ -74,8 +74,8 @@ namespace ContactsApi.Controllers
             skill.Id = 0;
             await _context.Skills.AddAsync(skill);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSkill", new { id = skill.Id }, skillModel);
+            skillModel.Id = skill.Id;
+            return CreatedAtAction("GetSkill", skillModel);
         }
 
         [HttpPost("/AddSkillToContact")]

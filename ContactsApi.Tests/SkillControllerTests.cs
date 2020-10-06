@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using ContactsApi.Controllers;
 using ContactsApi.Data;
+using ContactsApi.Data.Models;
 using ContactsApi.Mappings;
 using ContactsApi.Models;
 using ContactsApi.Tests.Fixtures;
@@ -72,7 +73,7 @@ namespace ContactsApi.Tests
         }
 
         [Fact]
-        public async Task PutContact_CorrectlyUpdatesFieldsInDatabase()
+        public async Task PutSkill_CorrectlyUpdatesFieldsInDatabase()
         {
             var response = await _sut.Object.PutSkill(_skillModel);
             var dbContact = await _context.Skills.FindAsync(FixtureBase.DrinkingBeerSkillId);
@@ -80,6 +81,40 @@ namespace ContactsApi.Tests
             Assert.IsType<OkObjectResult>(response);
             Assert.Equal(_skillModel.Name, dbContact.Name);
             Assert.Equal(_skillModel.SkillCode, dbContact.SkillCode);
+        }
+
+        [Fact]
+        public async Task PostSkill_CorrectlyAddsSkillInDatabase()
+        {
+            var response = await _sut.Object.PostSkill(_skillModel);
+            var createdSkill = (SkillModel)((CreatedAtActionResult)response.Result).Value;
+            var dbSkill = await _context.Skills.FindAsync(createdSkill.Id);
+
+            Assert.Equal(_skillModel.Name, dbSkill.Name);
+            Assert.Equal(_skillModel.SkillCode, dbSkill.SkillCode);
+            
+
+            _context.Skills.Remove(dbSkill);
+            await _context.SaveChangesAsync();
+        }
+
+        [Fact]
+        public async Task DeleteSkill_CorrectlyRemovesTheSkillFromTheDatabase()
+        {
+            var dbSkill = new Skill();
+            await _context.Skills.AddAsync(dbSkill);
+            await _context.SaveChangesAsync();
+
+            var response = await _sut.Object.DeleteSkill(dbSkill.Id);
+            Assert.IsType<OkObjectResult>(response);
+            Assert.Null(await _context.Skills.FindAsync(dbSkill.Id));
+        }
+
+        [Fact]
+        public async Task DeleteSkill_ReturnsNotFoundIfSkillNotFound()
+        {
+            var response = await _sut.Object.DeleteSkill(FixtureBase.SkillIdNotInDatabase);
+            Assert.IsType<NotFoundObjectResult>(response);
         }
     }
 }

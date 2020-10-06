@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using ContactsApi.Controllers;
 using ContactsApi.Data;
+using ContactsApi.Data.Models;
 using ContactsApi.Mappings;
 using ContactsApi.Models;
 using ContactsApi.Tests.Fixtures;
@@ -16,7 +17,9 @@ namespace ContactsApi.Tests
     public class ContactsControllerTests : IClassFixture<ContactFixture>
     {
         private readonly Mock<ContactsController> _sut;
+
         private readonly ContactContext _context;
+
         private readonly ContactModel _contactModel = new ContactModel
         {
             Id = ContactFixture.ContactIdForLoggedInUser,
@@ -33,7 +36,8 @@ namespace ContactsApi.Tests
             _context = fixture.ContactContext;
             var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile())));
             _sut = new Mock<ContactsController>(fixture.ContactContext, fixture.ApplicationDbContext, mapper) { CallBase = true };
-            _sut.SetupGet(x => x.CurrentUserId).Returns(FixtureBase.LoggedInUserId);
+            _sut.SetupGet(x => x.CurrentUserId)
+                .Returns(FixtureBase.LoggedInUserId);
         }
 
         [Fact]
@@ -41,7 +45,9 @@ namespace ContactsApi.Tests
         {
             var response = await _sut.Object.GetContacts();
             Assert.Single(response.Value);
-            Assert.Equal(response.Value.FirstOrDefault()?.Id, FixtureBase.ContactIdForLoggedInUser);
+            Assert.Equal(response.Value.FirstOrDefault()
+                                 ?.Id,
+                         FixtureBase.ContactIdForLoggedInUser);
         }
 
         [Fact]
@@ -62,10 +68,13 @@ namespace ContactsApi.Tests
         public async Task GetContactSkills_ReturnsCorrectSkillsForContact()
         {
             var response = await _sut.Object.GetContactSkills(FixtureBase.ContactIdForLoggedInUser);
-            var resultList = response.Value.Select(x => x.SkillId).ToList();
+            var resultList = response.Value.Select(x => x.SkillId)
+                                     .ToList();
             var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId, FixtureBase.RidingBikeSkillId };
 
-            var areEquivalent = resultList.Count == databaseList.Count && !resultList.Except(databaseList).Any();
+            var areEquivalent = resultList.Count == databaseList.Count &&
+                !resultList.Except(databaseList)
+                           .Any();
             Assert.True(areEquivalent);
         }
 
@@ -156,6 +165,25 @@ namespace ContactsApi.Tests
 
             _context.Contacts.Remove(dbContact);
             await _context.SaveChangesAsync();
+        }
+
+        [Fact]
+        public async Task DeleteContact_CorrectlyRemovesTheContactFromTheDatabase()
+        {
+            var dbContact = new Contact();
+            await _context.Contacts.AddAsync(dbContact);
+            await _context.SaveChangesAsync();
+
+            var response = await _sut.Object.DeleteContact(dbContact.Id);
+            Assert.IsType<OkObjectResult>(response);
+            Assert.Null(await _context.Contacts.FindAsync(dbContact.Id));
+        }
+
+        [Fact]
+        public async Task DeleteContact_ReturnsNotFoundIfContactNotFound()
+        {
+            var response = await _sut.Object.DeleteContact(FixtureBase.ContactIdNotInDatabase);
+            Assert.IsType<NotFoundObjectResult>(response);
         }
     }
 }
