@@ -24,8 +24,17 @@ namespace ContactsApi.Tests.Fixtures
         internal static readonly int SkillIdNotInDatabase = 3;
         #endregion
 
+        #region skill level
+        public const int NoobSkillLevelCode = 1;
+        public const int IntermediateSkillLevelCode = 2;
+        public const int AdvancedSkillLevelCode = 3;
+        public const int NotInDatabaseSkillLevelCode = 10;
+        #endregion
+
         public ApplicationDbContext ApplicationDbContext { get; set; }
         public ContactContext ContactContext { get; set; }
+
+        
 
         public void SeedTestDb()
         {
@@ -72,21 +81,21 @@ namespace ContactsApi.Tests.Fixtures
             {
                 Id = 1,
                 LevelDescription = "Noob",
-                LevelCode = 1
+                LevelCode = NoobSkillLevelCode
             };
             ContactContext.SkillLevels.Add(noobSkilLevel);
             var intermediateSkillLevel = new SkillLevel
             {
                 Id = 2,
                 LevelDescription = "Intermediate",
-                LevelCode = 2
+                LevelCode = IntermediateSkillLevelCode
             };
             ContactContext.SkillLevels.Add(intermediateSkillLevel);
             var advancedSkillLevel = new SkillLevel
             {
                 Id = 3,
                 LevelDescription = "Advanced",
-                LevelCode = 3
+                LevelCode = AdvancedSkillLevelCode
             };
             ContactContext.SkillLevels.Add(advancedSkillLevel);
             ContactContext.ContactSkills.Add(new ContactSkill
@@ -94,12 +103,6 @@ namespace ContactsApi.Tests.Fixtures
                 SkillId = DrinkingBeerSkillId,
                 ContactId = ContactIdForLoggedInUser,
                 SkillLevel = noobSkilLevel
-            });
-            ContactContext.ContactSkills.Add(new ContactSkill
-            {
-                SkillId = RidingBikeSkillId, //RidingBike
-                ContactId = ContactIdForLoggedInUser,
-                SkillLevel = advancedSkillLevel
             });
             ContactContext.SaveChanges();
         }

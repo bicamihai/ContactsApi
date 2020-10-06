@@ -9,6 +9,7 @@ using ContactsApi.Mappings;
 using ContactsApi.Models;
 using ContactsApi.Tests.Fixtures;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -17,6 +18,7 @@ namespace ContactsApi.Tests
     public class SkillControllerTests : IClassFixture<SkillFixture>
     {
         private readonly ContactContext _context;
+
         private readonly Mock<SkillsController> _sut;
 
         private readonly SkillModel _skillModel = new SkillModel
@@ -31,6 +33,8 @@ namespace ContactsApi.Tests
             var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile())));
             _context = fixture.ContactContext;
             _sut = new Mock<SkillsController>(fixture.ContactContext, fixture.ApplicationDbContext, mapper) { CallBase = true };
+            _sut.SetupGet(x => x.CurrentUserId)
+                .Returns(FixtureBase.LoggedInUserId);
         }
 
         [Fact]
@@ -87,12 +91,12 @@ namespace ContactsApi.Tests
         public async Task PostSkill_CorrectlyAddsSkillInDatabase()
         {
             var response = await _sut.Object.PostSkill(_skillModel);
-            var createdSkill = (SkillModel)((CreatedAtActionResult)response.Result).Value;
+            var createdSkill = (SkillModel) ((CreatedAtActionResult) response.Result).Value;
             var dbSkill = await _context.Skills.FindAsync(createdSkill.Id);
 
             Assert.Equal(_skillModel.Name, dbSkill.Name);
             Assert.Equal(_skillModel.SkillCode, dbSkill.SkillCode);
-            
+
 
             _context.Skills.Remove(dbSkill);
             await _context.SaveChangesAsync();
@@ -115,6 +119,114 @@ namespace ContactsApi.Tests
         {
             var response = await _sut.Object.DeleteSkill(FixtureBase.SkillIdNotInDatabase);
             Assert.IsType<NotFoundObjectResult>(response);
+        }
+
+        [Fact]
+        public async Task AddSkillToContact_ReturnsBadRequestIfContactSkillAlreadyExists()
+        {
+            var response = await _sut.Object.AddSkillToContact(FixtureBase.DrinkingBeerSkillId, FixtureBase.ContactIdForLoggedInUser, FixtureBase.NoobSkillLevelCode);
+            Assert.IsType<BadRequestObjectResult>(response);
+            Assert.Equal(((BadRequestObjectResult)response).Value, Resources.ContactSkillExists);
+        }
+        [Fact]
+        public async Task AddSkillToContact_ReturnsNotFoundIfSkillNotFound()
+        {
+            var response = await _sut.Object.AddSkillToContact(FixtureBase.SkillIdNotInDatabase, 0, 0);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.SkillNotFound);
+        }
+        [Fact]
+        public async Task AddSkillToContact_ReturnsNotFoundIfSkillLevelCodeNotFound()
+        {
+            var response = await _sut.Object.AddSkillToContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdForLoggedInUser, FixtureBase.NotInDatabaseSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.SkillLevelNotFound);
+        }
+        [Fact]
+        public async Task AddSkillToContact_ReturnsNotFoundIfContactNotFound()
+        {
+            var response = await _sut.Object.AddSkillToContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdNotInDatabase, FixtureBase.NoobSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.ContactNotFound);
+        }
+        [Fact]
+        public async Task AddSkillToContact_ReturnsNotFoundIfContactDoesNotBelongToLoggedInUser()
+        {
+            var response = await _sut.Object.AddSkillToContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdForNotLoggedInUser, FixtureBase.NoobSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.ContactNotFound);
+        }
+
+        [Fact]
+        public async Task AddSkillToContact_CorrectlyAddsContactSkill()
+        {
+            var response = await _sut.Object.AddSkillToContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdForLoggedInUser, FixtureBase.NoobSkillLevelCode);
+            
+
+            var contactSkill = await _context.ContactSkills.Where(x => x.ContactId == FixtureBase.ContactIdForLoggedInUser &&
+                                                                      x.SkillId == FixtureBase.RidingBikeSkillId &&
+                                                                      x.SkillLevel.LevelCode == FixtureBase.NoobSkillLevelCode).FirstOrDefaultAsync();
+            Assert.IsType<OkObjectResult>(response);
+            Assert.NotNull(contactSkill);
+
+            _context.Remove(contactSkill);
+            await _context.SaveChangesAsync();
+        }
+
+        [Fact]
+        public async Task UpdateSkillForContact_ReturnsNotFoundIfSkillNotFound()
+        {
+            var response = await _sut.Object.UpdateSkillForContact(FixtureBase.SkillIdNotInDatabase, FixtureBase.ContactIdForLoggedInUser, FixtureBase.NoobSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.SkillNotFound);
+        }
+
+        [Fact]
+        public async Task UpdateSkillForContact_ReturnsNotFoundIfContactNotFound()
+        {
+            var response = await _sut.Object.UpdateSkillForContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdNotInDatabase, FixtureBase.NoobSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.ContactNotFound);
+        }
+
+        [Fact]
+        public async Task UpdateSkillForContact_ReturnsNotFoundIfContactDoesNotBelongToLoggedInUser()
+        {
+            var response = await _sut.Object.UpdateSkillForContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdForNotLoggedInUser, FixtureBase.NoobSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.ContactNotFound);
+        }
+
+        [Fact]
+        public async Task UpdateSkillForContact_ReturnsNotFoundIfSkillLevelCodeNotFound()
+        {
+            var response = await _sut.Object.UpdateSkillForContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdForLoggedInUser, FixtureBase.NotInDatabaseSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.SkillLevelNotFound);
+        }
+
+        [Fact]
+        public async Task UpdateSkillForContact_ReturnsNotFoundIfContactSkillDoesNotExist()
+        {
+            var response = await _sut.Object.UpdateSkillForContact(FixtureBase.RidingBikeSkillId, FixtureBase.ContactIdForLoggedInUser, FixtureBase.NoobSkillLevelCode);
+            Assert.IsType<NotFoundObjectResult>(response);
+            Assert.Equal(((NotFoundObjectResult)response).Value, Resources.ContactSkillNotFound);
+        }
+
+        [Fact]
+        public async Task UpdateSkillForContact_CorrectlyUpdatesContactSkill()
+        {
+            var response = await _sut.Object.UpdateSkillForContact(FixtureBase.DrinkingBeerSkillId, FixtureBase.ContactIdForLoggedInUser, FixtureBase.AdvancedSkillLevelCode);
+
+
+            var contactSkill = await _context.ContactSkills.Where(x => x.ContactId == FixtureBase.ContactIdForLoggedInUser &&
+                                                                      x.SkillId == FixtureBase.DrinkingBeerSkillId &&
+                                                                      x.SkillLevel.LevelCode == FixtureBase.AdvancedSkillLevelCode).FirstOrDefaultAsync();
+            Assert.IsType<OkObjectResult>(response);
+            Assert.NotNull(contactSkill);
+
+            _context.Remove(contactSkill);
+            await _context.SaveChangesAsync();
         }
     }
 }

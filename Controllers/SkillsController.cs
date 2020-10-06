@@ -87,20 +87,20 @@ namespace ContactsApi.Controllers
             }
             if (!_context.Skills.Any(x => x.Id == skillId))
             {
-                return BadRequest(Resources.SkillNotFound);
+                return NotFound(Resources.SkillNotFound);
             }
             if (!_context.SkillLevels.Any(x => x.LevelCode == skillLevelCode))
             {
-                return BadRequest(Resources.SkillLevelNotFound);
+                return NotFound(Resources.SkillLevelNotFound);
             }
             var contact = await _context.Contacts.FindAsync(contactId);
             if (contact == null)
             {
-                return BadRequest(Resources.ContactNotFound);
+                return NotFound(Resources.ContactNotFound);
             }
             if (contact.UserId != CurrentUserId)
             {
-                return BadRequest(Resources.ContactNotFound);
+                return NotFound(Resources.ContactNotFound);
             }
             var skillLevel = await _context.SkillLevels.FirstOrDefaultAsync(x => x.LevelCode == skillLevelCode);
             var contactSkill = new ContactSkill
@@ -118,28 +118,31 @@ namespace ContactsApi.Controllers
         [HttpPut("/UpdateSkillForContact")]
         public async Task<ActionResult> UpdateSkillForContact(int skillId, int contactId, int skillLevelCode)
         {
-            var existingSkill = await _context.ContactSkills.FirstOrDefaultAsync(x => x.SkillId == skillId && x.ContactId == contactId);
-            if (existingSkill == null)
-            {
-                return BadRequest(Resources.ContactSkillNotFound);
-            }
             if (!_context.Skills.Any(x => x.Id == skillId))
             {
-                return BadRequest(Resources.SkillNotFound);
-            }
-            if (!_context.SkillLevels.Any(x => x.LevelCode == skillLevelCode))
-            {
-                return BadRequest(Resources.SkillLevelNotFound);
+                return NotFound(Resources.SkillNotFound);
             }
             var contact = await _context.Contacts.FindAsync(contactId);
             if (contact == null)
             {
-                return BadRequest(Resources.ContactNotFound);
+                return NotFound(Resources.ContactNotFound);
             }
             if (contact.UserId != CurrentUserId)
             {
-                return BadRequest(Resources.ContactNotFound);
+                return NotFound(Resources.ContactNotFound);
             }
+            if (!_context.SkillLevels.Any(x => x.LevelCode == skillLevelCode))
+            {
+                return NotFound(Resources.SkillLevelNotFound);
+            }
+            var existingSkill = await _context.ContactSkills.FirstOrDefaultAsync(x => x.SkillId == skillId && x.ContactId == contactId);
+            if (existingSkill == null)
+            {
+                return NotFound(Resources.ContactSkillNotFound);
+            }
+            
+            
+            
             var skillLevel = await _context.SkillLevels.FirstOrDefaultAsync(x => x.LevelCode == skillLevelCode);
 
             existingSkill.SkillLevel = skillLevel;

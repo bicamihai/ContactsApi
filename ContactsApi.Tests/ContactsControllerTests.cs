@@ -70,7 +70,7 @@ namespace ContactsApi.Tests
             var response = await _sut.Object.GetContactSkills(FixtureBase.ContactIdForLoggedInUser);
             var resultList = response.Value.Select(x => x.SkillId)
                                      .ToList();
-            var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId, FixtureBase.RidingBikeSkillId };
+            var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId };
 
             var areEquivalent = resultList.Count == databaseList.Count &&
                 !resultList.Except(databaseList)
