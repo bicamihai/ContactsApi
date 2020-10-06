@@ -6,6 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ContactsApi.Data\**" />
+    <Compile Remove="ContactsApi.Tests\**" />
+    <Content Remove="ContactsApi.Data\**" />
+    <Content Remove="ContactsApi.Tests\**" />
+    <EmbeddedResource Remove="ContactsApi.Data\**" />
+    <EmbeddedResource Remove="ContactsApi.Tests\**" />
+    <None Remove="ContactsApi.Data\**" />
+    <None Remove="ContactsApi.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.8" />
@@ -24,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ContactsApi.Data\ContactsApi.Data.csproj" />
+    <ProjectReference Include="ContactsApi.Data\ContactsApi.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

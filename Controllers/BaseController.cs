@@ -23,7 +23,7 @@ namespace ContactsApi.Controllers
             return _applicationDbContext.Users.FirstOrDefault(u => u.Id == identityClaim.Value)?.Id;
         }
 
-        internal string CurrentUserId
+        public virtual string CurrentUserId
         {
             get
             {
