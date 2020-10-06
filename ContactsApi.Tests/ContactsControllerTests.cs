@@ -6,21 +6,20 @@ using ContactsApi.Controllers;
 using ContactsApi.Data;
 using ContactsApi.Mappings;
 using ContactsApi.Models;
+using ContactsApi.Tests.Fixtures;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
 namespace ContactsApi.Tests
 {
-    public class ContactsControllerTests : IClassFixture<DbContextFixture>
+    public class ContactsControllerTests : IClassFixture<ContactFixture>
     {
         private readonly Mock<ContactsController> _sut;
-
         private readonly ContactContext _context;
-
         private readonly ContactModel _contactModel = new ContactModel
         {
-            Id = DbContextFixture.ContactIdForLoggedInUser,
+            Id = ContactFixture.ContactIdForLoggedInUser,
             Address = "new Address",
             Email = "newEmail@gmail.com",
             FirstName = "NewFirstName",
@@ -29,14 +28,12 @@ namespace ContactsApi.Tests
             LastName = "NewLastName"
         };
 
-        public ContactsControllerTests(DbContextFixture fixture)
+        public ContactsControllerTests(ContactFixture fixture)
         {
-            IMapper mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile())));
             _context = fixture.ContactContext;
-            var applicationDbContext = fixture.ApplicationDbContext;
-            _sut = new Mock<ContactsController>(_context, applicationDbContext, mapper) { CallBase = true };
-            _sut.SetupGet(x => x.CurrentUserId)
-                .Returns(DbContextFixture.LoggedInUserId);
+            var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile())));
+            _sut = new Mock<ContactsController>(fixture.ContactContext, fixture.ApplicationDbContext, mapper) { CallBase = true };
+            _sut.SetupGet(x => x.CurrentUserId).Returns(FixtureBase.LoggedInUserId);
         }
 
         [Fact]
@@ -44,66 +41,61 @@ namespace ContactsApi.Tests
         {
             var response = await _sut.Object.GetContacts();
             Assert.Single(response.Value);
-            Assert.Equal(response.Value.FirstOrDefault()
-                                 ?.Id,
-                         DbContextFixture.ContactIdForLoggedInUser);
+            Assert.Equal(response.Value.FirstOrDefault()?.Id, FixtureBase.ContactIdForLoggedInUser);
         }
 
         [Fact]
         public async Task GetContactSkills_ReturnsNotFoundIfContactNotFound()
         {
-            var response = await _sut.Object.GetContactSkills(DbContextFixture.ContactIdNotInDatabase);
+            var response = await _sut.Object.GetContactSkills(FixtureBase.ContactIdNotInDatabase);
             Assert.IsType<NotFoundObjectResult>(response.Result);
         }
 
         [Fact]
         public async Task GetContactSkills_ReturnsNotFoundIfContactDoesNotBelongToLoggedInUser()
         {
-            var response = await _sut.Object.GetContactSkills(DbContextFixture.ContactIdForNotLoggedInUser);
+            var response = await _sut.Object.GetContactSkills(FixtureBase.ContactIdForNotLoggedInUser);
             Assert.IsType<NotFoundObjectResult>(response.Result);
         }
 
         [Fact]
         public async Task GetContactSkills_ReturnsCorrectSkillsForContact()
         {
-            var response = await _sut.Object.GetContactSkills(DbContextFixture.ContactIdForLoggedInUser);
-            var resultList = response.Value.Select(x => x.SkillId)
-                                     .ToList();
-            var databaseList = new List<int> { DbContextFixture.DrinkingBeerSkillId, DbContextFixture.RidingBikeSkillId };
+            var response = await _sut.Object.GetContactSkills(FixtureBase.ContactIdForLoggedInUser);
+            var resultList = response.Value.Select(x => x.SkillId).ToList();
+            var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId, FixtureBase.RidingBikeSkillId };
 
-            var areEquivalent = resultList.Count == databaseList.Count &&
-                !resultList.Except(databaseList)
-                           .Any();
+            var areEquivalent = resultList.Count == databaseList.Count && !resultList.Except(databaseList).Any();
             Assert.True(areEquivalent);
         }
 
         [Fact]
         public async Task GetContact_ReturnsNotFoundIfContactNotFound()
         {
-            var response = await _sut.Object.GetContact(DbContextFixture.ContactIdNotInDatabase);
+            var response = await _sut.Object.GetContact(FixtureBase.ContactIdNotInDatabase);
             Assert.IsType<NotFoundObjectResult>(response.Result);
         }
 
         [Fact]
         public async Task GetContact_ReturnsNotFoundIfContactDoesNotBelongToLoggedInUser()
         {
-            var response = await _sut.Object.GetContact(DbContextFixture.ContactIdNotInDatabase);
+            var response = await _sut.Object.GetContact(FixtureBase.ContactIdNotInDatabase);
             Assert.IsType<NotFoundObjectResult>(response.Result);
         }
 
         [Fact]
         public async Task GetContact_ReturnsCorrectContact()
         {
-            var response = await _sut.Object.GetContact(DbContextFixture.ContactIdForLoggedInUser);
-            Assert.Equal(response.Value.Id, DbContextFixture.ContactIdForLoggedInUser);
+            var response = await _sut.Object.GetContact(FixtureBase.ContactIdForLoggedInUser);
+            Assert.Equal(response.Value.Id, FixtureBase.ContactIdForLoggedInUser);
         }
 
         [Fact]
-        public async Task PutContact_ReturnsNotFoundIfContactIdIsNotFound()
+        public async Task PutContact_ReturnsNotFoundIfContactIsNotFound()
         {
             var contactModel = new ContactModel
             {
-                Id = DbContextFixture.ContactIdNotInDatabase
+                Id = FixtureBase.ContactIdNotInDatabase
             };
             var response = await _sut.Object.PutContact(contactModel);
             Assert.IsType<NotFoundObjectResult>(response);
@@ -114,7 +106,7 @@ namespace ContactsApi.Tests
         {
             var contactModel = new ContactModel
             {
-                Id = DbContextFixture.ContactIdForNotLoggedInUser
+                Id = FixtureBase.ContactIdForNotLoggedInUser
             };
             var response = await _sut.Object.PutContact(contactModel);
             Assert.IsType<NotFoundObjectResult>(response);
@@ -124,7 +116,7 @@ namespace ContactsApi.Tests
         public async Task PutContact_CorrectlyUpdatesFieldsInDatabase()
         {
             var response = await _sut.Object.PutContact(_contactModel);
-            var dbContact = await _context.Contacts.FindAsync(DbContextFixture.ContactIdForLoggedInUser);
+            var dbContact = await _context.Contacts.FindAsync(FixtureBase.ContactIdForLoggedInUser);
 
             Assert.IsType<OkObjectResult>(response);
             Assert.Equal(_contactModel.Address, dbContact.Address);
@@ -160,7 +152,7 @@ namespace ContactsApi.Tests
             var createdContact = (ContactModel) ((CreatedAtActionResult) response.Result).Value;
             var dbContact = await _context.Contacts.FindAsync(createdContact.Id);
 
-            Assert.Equal(dbContact.UserId, DbContextFixture.LoggedInUserId);
+            Assert.Equal(dbContact.UserId, FixtureBase.LoggedInUserId);
 
             _context.Contacts.Remove(dbContact);
             await _context.SaveChangesAsync();

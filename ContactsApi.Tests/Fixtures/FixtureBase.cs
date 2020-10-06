@@ -2,17 +2,15 @@
 using ContactsApi.Data;
 using ContactsApi.Data.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
-namespace ContactsApi.Tests
+namespace ContactsApi.Tests.Fixtures
 {
-    public class DbContextFixture : IDisposable
+    public class FixtureBase : IDisposable
     {
         #region contacts
         public const int ContactIdForLoggedInUser = 1;
         public const int ContactIdForNotLoggedInUser = 2;
         public const int ContactIdNotInDatabase = 3;
-        public const int ContactIdForPostTest = 4;
         #endregion
 
         #region users
@@ -23,19 +21,14 @@ namespace ContactsApi.Tests
         #region skills
         public const int DrinkingBeerSkillId = 1;
         public const int RidingBikeSkillId = 2;
+        internal static readonly int SkillIdNotInDatabase = 3;
         #endregion
 
-        public ApplicationDbContext ApplicationDbContext { get; }
-        public ContactContext ContactContext { get; }
+        public ApplicationDbContext ApplicationDbContext { get; set; }
+        public ContactContext ContactContext { get; set; }
 
-        
-
-        public DbContextFixture()
+        public void SeedTestDb()
         {
-            var applicationDbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-                                       .UseInMemoryDatabase(databaseName: "ContactDatabase")
-                                       .Options;
-            ApplicationDbContext = new ApplicationDbContext(applicationDbOptions);
             ApplicationDbContext.Users.Add(new IdentityUser()
             {
                 Id = LoggedInUserId
@@ -45,12 +38,6 @@ namespace ContactsApi.Tests
                 Id = AnotherUserId,
             });
             ApplicationDbContext.SaveChanges();
-
-            var contactOptions = new DbContextOptionsBuilder<ContactContext>()
-                                 .UseInMemoryDatabase(databaseName: "ContactDatabase")
-                                 .Options;
-
-            ContactContext = new ContactContext(contactOptions);
             ContactContext.Contacts.Add(new Contact
             {
                 Id = ContactIdForLoggedInUser,
@@ -118,6 +105,8 @@ namespace ContactsApi.Tests
         }
         public void Dispose()
         {
+            ApplicationDbContext.Database.EnsureDeleted();
+            ContactContext.Database.EnsureDeleted();
             ApplicationDbContext.Dispose();
             ContactContext.Dispose();
         }
