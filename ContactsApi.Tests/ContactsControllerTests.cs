@@ -22,11 +22,10 @@ namespace ContactsApi.Tests
 
         private readonly ContactModel _contactModel = new ContactModel
         {
-            Id = ContactFixture.ContactIdForLoggedInUser,
+            Id = FixtureBase.ContactIdForLoggedInUser,
             Address = "new Address",
             Email = "newEmail@gmail.com",
             FirstName = "NewFirstName",
-            FullName = "FullName",
             MobilePhoneNumber = "123123",
             LastName = "NewLastName"
         };
@@ -131,7 +130,6 @@ namespace ContactsApi.Tests
             Assert.Equal(_contactModel.Address, dbContact.Address);
             Assert.Equal(_contactModel.Email, dbContact.Email);
             Assert.Equal(_contactModel.FirstName, dbContact.FirstName);
-            Assert.Equal(_contactModel.FullName, dbContact.FullName);
             Assert.Equal(_contactModel.MobilePhoneNumber, dbContact.MobilePhoneNumber);
             Assert.Equal(_contactModel.LastName, dbContact.LastName);
         }
@@ -146,7 +144,6 @@ namespace ContactsApi.Tests
             Assert.Equal(_contactModel.Address, dbContact.Address);
             Assert.Equal(_contactModel.Email, dbContact.Email);
             Assert.Equal(_contactModel.FirstName, dbContact.FirstName);
-            Assert.Equal(_contactModel.FullName, dbContact.FullName);
             Assert.Equal(_contactModel.MobilePhoneNumber, dbContact.MobilePhoneNumber);
             Assert.Equal(_contactModel.LastName, dbContact.LastName);
 

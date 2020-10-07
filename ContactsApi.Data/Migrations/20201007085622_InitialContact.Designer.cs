@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContactsApi.Data.Migrations
 {
     [DbContext(typeof(ContactContext))]
-    [Migration("20201005141857_InitialContactContext")]
-    partial class InitialContactContext
+    [Migration("20201007085622_InitialContact")]
+    partial class InitialContact
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,9 +35,6 @@ namespace ContactsApi.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")

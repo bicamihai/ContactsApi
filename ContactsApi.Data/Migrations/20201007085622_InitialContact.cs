@@ -2,7 +2,7 @@
 
 namespace ContactsApi.Data.Migrations
 {
-    public partial class InitialContactContext : Migration
+    public partial class InitialContact : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,7 +14,6 @@ namespace ContactsApi.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    FullName = table.Column<string>(nullable: true),
                     Address = table.Column<string>(nullable: true),
                     Email = table.Column<string>(nullable: true),
                     MobilePhoneNumber = table.Column<string>(nullable: true),

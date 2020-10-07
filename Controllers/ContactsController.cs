@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using ContactsApi.Data;
@@ -8,6 +9,7 @@ using ContactsApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Swashbuckle.Swagger.Annotations;
 
 namespace ContactsApi.Controllers
 {
@@ -21,9 +23,13 @@ namespace ContactsApi.Controllers
         public ContactsController(ContactContext context, ApplicationDbContext applicationDbContext, IMapper mapper) : base(applicationDbContext, mapper)
         {
             _context = context;
-        } 
+        }
 
+        /// <summary>
+        /// Gets all contacts of signed in user.
+        /// </summary>
         [HttpGet]
+        [SwaggerResponse(HttpStatusCode.OK, "List of contacts", typeof(IEnumerable<ContactModel>))]
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
         {
             var contacts = await _context.Contacts.Where(c => c.UserId == CurrentUserId).ToListAsync();
@@ -31,7 +37,13 @@ namespace ContactsApi.Controllers
             return new ActionResult<IEnumerable<ContactModel>>(contactsDto);
         }
 
+        /// <summary>
+        /// Gets all skills and specific skill level for the specified customer.
+        /// </summary>
+        /// <param name="contactId"></param> 
         [HttpGet("/GetContactSkills")]
+        [SwaggerResponse(HttpStatusCode.OK, "List of contact skills", typeof(IEnumerable<ContactSkillModel>))]
+        [SwaggerResponse(HttpStatusCode.NotFound, Type = typeof(NotFoundObjectResult))]
         public async Task<ActionResult<IEnumerable<ContactSkillModel>>> GetContactSkills(int contactId)
         {
             var contact = await _context.Contacts.Where(c=>c.Id == contactId && c.UserId == CurrentUserId)
@@ -49,6 +61,10 @@ namespace ContactsApi.Controllers
             return new ActionResult<IEnumerable<ContactSkillModel>>(returnList);
         }
 
+        /// <summary>
+        /// Gets a specific customer.
+        /// </summary>
+        /// <param name="id"></param> 
         [HttpGet("{id}")]
         public async Task<ActionResult<ContactModel>> GetContact(int id)
         {
@@ -60,6 +76,10 @@ namespace ContactsApi.Controllers
             return new ActionResult<ContactModel>(Mapper.Map<ContactModel>(contact));
         }
 
+        /// <summary>
+        /// Edits details of a specific customer.
+        /// </summary>
+        /// <param name="contactModel"></param> 
         [HttpPut]
         public async Task<IActionResult> PutContact(ContactModel contactModel)
         {
@@ -85,6 +105,10 @@ namespace ContactsApi.Controllers
             return Ok(Resources.ContactUpdated);
         }
 
+        /// <summary>
+        /// Adds a customer for the signed in user.
+        /// </summary>
+        /// <param name="contactModel"></param> 
         [HttpPost]
         public async Task<ActionResult<ContactModel>> PostContact(ContactModel contactModel)
         {
@@ -94,9 +118,13 @@ namespace ContactsApi.Controllers
             await _context.Contacts.AddAsync(contact);
             await _context.SaveChangesAsync();
             contactModel.Id = contact.Id;
-            return CreatedAtAction("GetContact", contactModel);
+            return CreatedAtAction("GetContact", new { id = contactModel.Id }, contactModel);
         }
 
+        /// <summary>
+        /// Deletes a specific Contact.
+        /// </summary>
+        /// <param name="id"></param> 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteContact(int id)
         {

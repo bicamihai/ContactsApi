@@ -23,6 +23,9 @@ namespace ContactsApi.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Gets a list of all skills in the database.
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SkillModel>>> GetSkills()
         {
@@ -30,6 +33,10 @@ namespace ContactsApi.Controllers
             return new ActionResult<IEnumerable<SkillModel>>(Mapper.Map<IEnumerable<SkillModel>>(skills));
         }
 
+        /// <summary>
+        /// Gets a specific skill.
+        /// </summary>
+        /// <param name="id"></param> 
         [HttpGet("{id}")]
         public async Task<ActionResult<SkillModel>> GetSkill(int id)
         {
@@ -43,6 +50,10 @@ namespace ContactsApi.Controllers
             return new ActionResult<SkillModel>(Mapper.Map<SkillModel>(skill));
         }
 
+        /// <summary>
+        /// Edits the details for a specific skill.
+        /// </summary>
+        /// <param name="skillModel"></param> 
         [HttpPut]
         public async Task<IActionResult> PutSkill(SkillModel skillModel)
         {
@@ -67,6 +78,10 @@ namespace ContactsApi.Controllers
             return Ok(Resources.SkillUpdated);
         }
 
+        /// <summary>
+        /// Adds a skill.
+        /// </summary>
+        /// <param name="skillModel"></param> 
         [HttpPost]
         public async Task<ActionResult<SkillModel>> PostSkill(SkillModel skillModel)
         {
@@ -75,9 +90,13 @@ namespace ContactsApi.Controllers
             await _context.Skills.AddAsync(skill);
             await _context.SaveChangesAsync();
             skillModel.Id = skill.Id;
-            return CreatedAtAction("GetSkill", skillModel);
+            return CreatedAtAction("GetSkill", new { id = skillModel.Id }, skillModel);
         }
 
+        /// <summary>
+        /// Adds a skill with a skill level to a customer.
+        /// </summary>
+        /// <param name="skillId"></param> <param name="contactId"></param> <param name="skillLevelCode"></param>
         [HttpPost("/AddSkillToContact")]
         public async Task<ActionResult> AddSkillToContact(int skillId, int contactId, int skillLevelCode)
         {
@@ -115,6 +134,10 @@ namespace ContactsApi.Controllers
             return Ok(Resources.ContactSkillCreated);
         }
 
+        /// <summary>
+        /// Updates a skill level for a skill of a contact.
+        /// </summary>
+        /// <param name="skillId"></param> <param name="contactId"></param> <param name="skillLevelCode"></param>
         [HttpPut("/UpdateSkillForContact")]
         public async Task<ActionResult> UpdateSkillForContact(int skillId, int contactId, int skillLevelCode)
         {
@@ -151,6 +174,10 @@ namespace ContactsApi.Controllers
             return Ok(Resources.ContactSkillUpdated);
         }
 
+        /// <summary>
+        /// Removes a skill.
+        /// </summary>
+        /// <param name="id"></param>param>
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteSkill(int id)
         {
