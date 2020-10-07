@@ -9,10 +9,12 @@ using ContactsApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Swashbuckle.Swagger.Annotations;
 
 namespace ContactsApi.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -28,8 +30,9 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Gets all contacts of signed in user.
         /// </summary>
+        /// <response code="200">Returns all contacts of signed in user</response>
         [HttpGet]
-        [SwaggerResponse(HttpStatusCode.OK, "List of contacts", typeof(IEnumerable<ContactModel>))]
+        [ProducesResponseType(typeof(IEnumerable<ContactModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
         {
             var contacts = await _context.Contacts.Where(c => c.UserId == CurrentUserId).ToListAsync();
@@ -38,12 +41,16 @@ namespace ContactsApi.Controllers
         }
 
         /// <summary>
-        /// Gets all skills and specific skill level for the specified customer.
+        /// Gets all skills with the specific skill level for the specified contact.
         /// </summary>
-        /// <param name="contactId"></param> 
+        /// <param name="contactId">the contact</param>
+        /// <response code="200">Returns all skills with specific skill level for the specified customer.</response>
+        /// <response code="404">Contact was not found.</response>
+        /// <response code="400">Parameter contactId not a valid int</response> 
         [HttpGet("/GetContactSkills")]
-        [SwaggerResponse(HttpStatusCode.OK, "List of contact skills", typeof(IEnumerable<ContactSkillModel>))]
-        [SwaggerResponse(HttpStatusCode.NotFound, Type = typeof(NotFoundObjectResult))]
+        [ProducesResponseType(typeof(IEnumerable<ContactSkillModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<IEnumerable<ContactSkillModel>>> GetContactSkills(int contactId)
         {
             var contact = await _context.Contacts.Where(c=>c.Id == contactId && c.UserId == CurrentUserId)
@@ -62,10 +69,16 @@ namespace ContactsApi.Controllers
         }
 
         /// <summary>
-        /// Gets a specific customer.
+        /// Gets a specific contact.
         /// </summary>
-        /// <param name="id"></param> 
+        /// <param name="id">the contact</param>
+        /// <response code="200">Returns contact details.</response>
+        /// <response code="404">Contact was not found.</response>
+        /// <response code="400">Parameter contactId not a valid int</response> 
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(ContactModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ContactModel>> GetContact(int id)
         {
             var contact = await _context.Contacts.FirstOrDefaultAsync(c=>c.Id == id && c.UserId == CurrentUserId);
@@ -79,8 +92,14 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Edits details of a specific customer.
         /// </summary>
-        /// <param name="contactModel"></param> 
+        /// <param name="contactModel">Contact model should contain the correct id of the record that needs to be updated</param>
+        /// <response code="200">Contact was successfully updated.</response>
+        /// <response code="404">Contact was not found.</response>
+        /// <response code="400">Validation errors for contact fields</response> 
         [HttpPut]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PutContact(ContactModel contactModel)
         {
             var contact = await _context.Contacts.FindAsync(contactModel.Id);
@@ -108,8 +127,12 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Adds a customer for the signed in user.
         /// </summary>
-        /// <param name="contactModel"></param> 
+        /// <param name="contactModel">The contactModel to be added, id property is ignored, as it is handled by the database</param>
+        /// <response code="200">Contact was successfully added.</response>
+        /// <response code="400">Validation errors for contact fields</response> 
         [HttpPost]
+        [ProducesResponseType(typeof(ContactModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ContactModel>> PostContact(ContactModel contactModel)
         {
             var contact = Mapper.Map<Contact>(contactModel);
@@ -124,8 +147,14 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Deletes a specific Contact.
         /// </summary>
-        /// <param name="id"></param> 
+        /// <param name="id">The contact to be removed</param>
+        /// <response code="200">Contact was successfully updated.</response>
+        /// <response code="404">Contact was not found.</response>
+        /// <response code="400">Parameter contactId not a valid int</response> 
         [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeleteContact(int id)
         {
             var contact = await _context.Contacts.FindAsync(id);

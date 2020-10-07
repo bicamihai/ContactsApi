@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ContactsApi.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
