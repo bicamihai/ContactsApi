@@ -8,10 +8,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using ContactsApi.Data;
 using ContactsApi.Mappings;
-using ContactsApi.Middlewares;
+using ContactsApi.Middleware;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace ContactsApi
@@ -63,8 +64,13 @@ namespace ContactsApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+            app.UseExceptionHandler(new ExceptionHandlerOptions
+            {
+                ExceptionHandler = new JsonExceptionMiddleware(logger).Invoke
+            });
+
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
@@ -72,17 +78,7 @@ namespace ContactsApi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+            
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var applicationContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -91,11 +87,7 @@ namespace ContactsApi
                 contactsContext.Database.Migrate();
             }
 
-            app.UseExceptionHandler(new ExceptionHandlerOptions
-                {
-                    ExceptionHandler = new JsonExceptionMiddleware().Invoke
-                }
-            );
+           
             //app.UseMiddleware<ApiExceptionMiddleware>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();

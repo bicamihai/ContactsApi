@@ -5,33 +5,32 @@ using System.Security.Authentication;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace ContactsApi.Middleware
 {
     public class JsonExceptionMiddleware
     {
-        public JsonExceptionMiddleware()
+        private readonly ILogger _logger;
+        public JsonExceptionMiddleware(ILogger logger)
         {
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
         {
             var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
-            if (contextFeature != null && contextFeature.Error != null)
+            if (contextFeature?.Error != null)
             {
-                // ...
-                // Add lines to your log file, or your 
-                // Application insights instance here
-                // ...
+                _logger.LogError(contextFeature.Error, contextFeature.Error.Message);
                 context.Response.StatusCode = (int)GetErrorCode(contextFeature.Error);
                 context.Response.ContentType = "application/json";
 
-                await context.Response.WriteAsync(JsonConvert.SerializeObject(new ProblemDetails()
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(new 
                 {
                     Status = context.Response.StatusCode,
-                    Title = contextFeature.Error.Message
+                    Title = $"Api internal error; TraceId: {context.TraceIdentifier}"
                 }));
             }
         }
