@@ -38,6 +38,19 @@ namespace ContactsApi.Controllers
         }
 
         /// <summary>
+        /// Gets a list of all skills levels in the database.
+        /// The skill levels are seed data, therefore, they cannot be edited
+        /// </summary>
+        /// <response code="200">Returns a list of all skill levels in the database</response>
+        [HttpGet("/api/GetSkillLevels")]
+        [ProducesResponseType(typeof(IEnumerable<SkillLevelModel>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<SkillLevelModel>>> GetSkillLevels()
+        {
+            var skillLevels = await _context.SkillLevels.ToListAsync();
+            return new ActionResult<IEnumerable<SkillLevelModel>>(Mapper.Map<IEnumerable<SkillLevelModel>>(skillLevels));
+        }
+
+        /// <summary>
         /// Gets a specific skill.
         /// </summary>
         /// <param name="id">The id of the skill</param>
@@ -121,7 +134,7 @@ namespace ContactsApi.Controllers
         /// <response code="404">Skill, Contact or Skill level not found</response>
         /// <response code="400">The specified skill for the specified contact already exists, use PUT method if you want to update</response>
 
-        [HttpPost("/AddSkillToContact")]
+        [HttpPost("/api/AddSkillToContact")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -167,7 +180,7 @@ namespace ContactsApi.Controllers
         /// <param name="skillId">The skill</param> <param name="contactId">The contact</param> <param name="skillLevelCode">The code of the skill level</param>
         /// <response code="200">Skill for contact was successfully updated.</response>
         /// <response code="404">Skill for Contact or Skil level was not found</response>
-        [HttpPut("/UpdateSkillForContact")]
+        [HttpPut("/api/UpdateSkillForContact")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateSkillForContact(int skillId, int contactId, int skillLevelCode)

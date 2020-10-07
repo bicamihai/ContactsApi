@@ -47,7 +47,7 @@ namespace ContactsApi.Controllers
         /// <response code="200">Returns all skills with specific skill level for the specified customer.</response>
         /// <response code="404">Contact was not found.</response>
         /// <response code="400">Parameter contactId not a valid int</response> 
-        [HttpGet("/GetContactSkills")]
+        [HttpGet("/api/GetContactSkills")]
         [ProducesResponseType(typeof(IEnumerable<ContactSkillModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
