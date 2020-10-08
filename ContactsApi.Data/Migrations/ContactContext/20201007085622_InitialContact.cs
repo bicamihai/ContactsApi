@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ContactsApi.Data.Migrations
+namespace ContactsApi.Data.Migrations.ContactContext
 {
     public partial class InitialContact : Migration
     {
