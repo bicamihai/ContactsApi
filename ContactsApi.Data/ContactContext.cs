@@ -9,10 +9,6 @@ namespace ContactsApi.Data
 {
     public class ContactContext : DbContext, IContactContext
     {
-
-
-
-
         public ContactContext(DbContextOptions<ContactContext> options) : base(options) {}
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<Skill> Skills { get; set; }
@@ -158,7 +154,5 @@ namespace ContactsApi.Data
         {
             return await Contacts.AddAsync(contact);
         }
-
-        
     }
 }
