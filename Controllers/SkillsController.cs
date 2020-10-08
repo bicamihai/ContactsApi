@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ContactsApi.Data;
@@ -18,11 +17,8 @@ namespace ContactsApi.Controllers
     [Authorize]
     public class SkillsController : BaseController
     {
-        private readonly ContactContext _context;
-
-        public SkillsController(ContactContext context, ApplicationDbContext applicationDbContext, IMapper mapper) : base(applicationDbContext, mapper)
+        public SkillsController(IContactContext context, IApplicationDbContext applicationDbContext, IMapper mapper) : base(context, applicationDbContext, mapper)
         {
-            _context = context;
         }
 
         /// <summary>
@@ -33,7 +29,7 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(IEnumerable<SkillModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<SkillModel>>> GetSkills()
         {
-            var skills = await _context.Skills.ToListAsync();
+            var skills = await Context.GetSkillsAsync();
             return new ActionResult<IEnumerable<SkillModel>>(Mapper.Map<IEnumerable<SkillModel>>(skills));
         }
 
@@ -46,7 +42,7 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(IEnumerable<SkillLevelModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<SkillLevelModel>>> GetSkillLevels()
         {
-            var skillLevels = await _context.SkillLevels.ToListAsync();
+            var skillLevels = await Context.GetSkillLevelsAsync();
             return new ActionResult<IEnumerable<SkillLevelModel>>(Mapper.Map<IEnumerable<SkillLevelModel>>(skillLevels));
         }
 
@@ -63,7 +59,7 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<SkillModel>> GetSkill(int id)
         {
-            var skill = await _context.Skills.FindAsync(id);
+            var skill = await Context.GetSkillAsync(id);
 
             if (skill == null)
             {
@@ -86,7 +82,7 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PutSkill(SkillModel skillModel)
         {
-            var skill = await _context.Skills.FindAsync(skillModel.Id);
+            var skill = await Context.GetSkillAsync(skillModel.Id);
             if (skill == null)
             {
                 return NotFound(Resources.SkillNotFound);
@@ -94,7 +90,7 @@ namespace ContactsApi.Controllers
             Mapper.Map(skillModel, skill);
             try
             {
-                await _context.SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -120,8 +116,8 @@ namespace ContactsApi.Controllers
         {
             var skill = Mapper.Map<Skill>(skillModel);
             skill.Id = 0;
-            await _context.Skills.AddAsync(skill);
-            await _context.SaveChangesAsync();
+            await Context.AddSkillAsync(skill);
+            await Context.SaveChangesAsync();
             skillModel.Id = skill.Id;
             return CreatedAtAction("GetSkill", new { id = skillModel.Id }, skillModel);
         }
@@ -140,19 +136,24 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> AddSkillToContact(int skillId, int contactId, int skillLevelCode)
         {
-            if (_context.ContactSkills.Any(x => x.SkillId == skillId && x.ContactId == contactId))
+            var contactSkill =await  Context.GetContactSkillAsync(skillId, contactId);
+            if (contactSkill != null)  
             {
                 return BadRequest(Resources.ContactSkillExists);
             }
-            if (!_context.Skills.Any(x => x.Id == skillId))
+            var skill = await Context.GetSkillAsync(skillId);
+            if (skill == null)
             {
                 return NotFound(Resources.SkillNotFound);
             }
-            if (!_context.SkillLevels.Any(x => x.LevelCode == skillLevelCode))
+
+            var skillLevel = await Context.GetSkillLevelAsync(skillLevelCode);
+            if (skillLevel == null)
             {
                 return NotFound(Resources.SkillLevelNotFound);
             }
-            var contact = await _context.Contacts.FindAsync(contactId);
+
+            var contact = await Context.GetContactAsync(contactId);
             if (contact == null)
             {
                 return NotFound(Resources.ContactNotFound);
@@ -161,15 +162,14 @@ namespace ContactsApi.Controllers
             {
                 return NotFound(Resources.ContactNotFound);
             }
-            var skillLevel = await _context.SkillLevels.FirstOrDefaultAsync(x => x.LevelCode == skillLevelCode);
-            var contactSkill = new ContactSkill
+            contactSkill = new ContactSkill
             {
                 ContactId = contactId,
                 SkillId = skillId,
                 SkillLevel = skillLevel
             };
-            await _context.ContactSkills.AddAsync(contactSkill);
-            await _context.SaveChangesAsync();
+            await Context.AddContactSkillsAsync(contactSkill);
+            await Context.SaveChangesAsync();
 
             return Ok(Resources.ContactSkillCreated);
         }
@@ -185,11 +185,12 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateSkillForContact(int skillId, int contactId, int skillLevelCode)
         {
-            if (!_context.Skills.Any(x => x.Id == skillId))
+            var skill = await Context.GetSkillAsync(skillId);
+            if (skill == null)
             {
                 return NotFound(Resources.SkillNotFound);
             }
-            var contact = await _context.Contacts.FindAsync(contactId);
+            var contact = await Context.GetContactAsync(contactId);
             if (contact == null)
             {
                 return NotFound(Resources.ContactNotFound);
@@ -198,18 +199,20 @@ namespace ContactsApi.Controllers
             {
                 return NotFound(Resources.ContactNotFound);
             }
-            if (!_context.SkillLevels.Any(x => x.LevelCode == skillLevelCode))
+
+            var skillLevel = await Context.GetSkillLevelAsync(skillLevelCode);
+            if (skillLevel == null)
             {
                 return NotFound(Resources.SkillLevelNotFound);
             }
-            var existingSkill = await _context.ContactSkills.FirstOrDefaultAsync(x => x.SkillId == skillId && x.ContactId == contactId);
+
+            var existingSkill = await Context.GetContactSkillAsync(skillId, contactId);
             if (existingSkill == null)
             {
                 return NotFound(Resources.ContactSkillNotFound);
             }
-            var skillLevel = await _context.SkillLevels.FirstOrDefaultAsync(x => x.LevelCode == skillLevelCode);
             existingSkill.SkillLevel = skillLevel;
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
 
             return Ok(Resources.ContactSkillUpdated);
         }
@@ -225,21 +228,21 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteSkill(int id)
         {
-            var skill = await _context.Skills.FindAsync(id);
+            var skill = await Context.GetSkillAsync(id);
             if (skill == null)
             {
                 return NotFound(Resources.SkillNotFound);
             }
 
-            _context.Skills.Remove(skill);
-            await _context.SaveChangesAsync();
+            Context.Remove<Skill>(skill);
+            await Context.SaveChangesAsync();
 
             return Ok(Resources.SkillRemoved);
         }
 
         private bool SkillExists(int id)
         {
-            return _context.Skills.Any(e => e.Id == id);
+            return Context.GetSkill(id) != null; 
         }
     }
 }

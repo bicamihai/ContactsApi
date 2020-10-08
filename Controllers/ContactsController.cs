@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using ContactsApi.Data;
@@ -10,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Swashbuckle.Swagger.Annotations;
 
 namespace ContactsApi.Controllers
 {
@@ -20,11 +17,8 @@ namespace ContactsApi.Controllers
     [Authorize]
     public class ContactsController : BaseController
     {
-        private readonly ContactContext _context;
-
-        public ContactsController(ContactContext context, ApplicationDbContext applicationDbContext, IMapper mapper) : base(applicationDbContext, mapper)
+        public ContactsController(IContactContext contactContext, IApplicationDbContext applicationDbContext, IMapper mapper) : base(contactContext, applicationDbContext, mapper)
         {
-            _context = context;
         }
 
         /// <summary>
@@ -35,7 +29,7 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(IEnumerable<ContactModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
         {
-            var contacts = await _context.Contacts.Where(c => c.UserId == CurrentUserId).ToListAsync();
+            var contacts = await Context.GetContactsForUserAsync(CurrentUserId);
             var contactsDto = Mapper.Map<IEnumerable<ContactModel>>(contacts);
             return new ActionResult<IEnumerable<ContactModel>>(contactsDto);
         }
@@ -53,18 +47,13 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<IEnumerable<ContactSkillModel>>> GetContactSkills(int contactId)
         {
-            var contact = await _context.Contacts.Where(c=>c.Id == contactId && c.UserId == CurrentUserId)
-                                        .Include(x=>x.ContactSkills)
-                                        .ThenInclude(x=>x.Skill)
-                                        .Include(x => x.ContactSkills)
-                                        .ThenInclude(x => x.SkillLevel)
-                                        .FirstOrDefaultAsync();
-            if (contact == null)
+            var contact = await Context.GetContactAsync(contactId);
+            if (contact == null || contact.UserId != CurrentUserId)
             {
                 return NotFound(Resources.ContactNotFound);
             }
-
-            var returnList = Mapper.Map<IEnumerable<ContactSkillModel>>(contact.ContactSkills);
+            var contactSkills = await Context.GetContactSkills(contactId, CurrentUserId);
+            var returnList = Mapper.Map<IEnumerable<ContactSkillModel>>(contactSkills);
             return new ActionResult<IEnumerable<ContactSkillModel>>(returnList);
         }
 
@@ -81,8 +70,8 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ContactModel>> GetContact(int id)
         {
-            var contact = await _context.Contacts.FirstOrDefaultAsync(c=>c.Id == id && c.UserId == CurrentUserId);
-            if (contact == null)
+            var contact = await Context.GetContactAsync(id);
+            if (contact == null || contact.UserId != CurrentUserId)
             {
                 return NotFound(Resources.ContactNotFound);
             }
@@ -102,7 +91,7 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PutContact(ContactModel contactModel)
         {
-            var contact = await _context.Contacts.FindAsync(contactModel.Id);
+            var contact = await Context.GetContactAsync(contactModel.Id);
             if (contact == null || contact.UserId != CurrentUserId)
             {
                 return NotFound(Resources.ContactNotFound);
@@ -111,7 +100,7 @@ namespace ContactsApi.Controllers
             Mapper.Map(contactModel, contact);
             try
             {
-                await _context.SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -138,8 +127,8 @@ namespace ContactsApi.Controllers
             var contact = Mapper.Map<Contact>(contactModel);
             contact.Id = 0;
             contact.UserId = CurrentUserId;
-            await _context.Contacts.AddAsync(contact);
-            await _context.SaveChangesAsync();
+            await Context.AddContactAsync(contact);
+            await Context.SaveChangesAsync();
             contactModel.Id = contact.Id;
             return CreatedAtAction("GetContact", new { id = contactModel.Id }, contactModel);
         }
@@ -157,21 +146,21 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> DeleteContact(int id)
         {
-            var contact = await _context.Contacts.FindAsync(id);
+            var contact = await Context.GetContactAsync(id);
             if (contact == null)
             {
                 return NotFound(Resources.ContactNotFound);
             }
 
-            _context.Contacts.Remove(contact);
-            await _context.SaveChangesAsync();
+            Context.Remove(contact);
+            await Context.SaveChangesAsync();
 
             return Ok(Resources.ContactRemoved);
         }
 
         private bool ContactExists(int id)
         {
-            return _context.Contacts.Any(e => e.Id == id);
+            return Context.GetContact(id) != null;
         }
     }
 }

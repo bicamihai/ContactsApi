@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoMapper;
 using ContactsApi.Data;
 
@@ -8,11 +9,13 @@ namespace ContactsApi.Controllers
 {
     public class BaseController : ControllerBase
     {
-        private readonly ApplicationDbContext _applicationDbContext;
+        private readonly IApplicationDbContext _applicationDbContext;
+        public readonly IContactContext Context;
         protected readonly IMapper Mapper;
 
-        public BaseController(ApplicationDbContext applicationDbContext, IMapper mapper)
+        public BaseController(IContactContext contactContext, IApplicationDbContext applicationDbContext, IMapper mapper)
         {
+            Context = contactContext;
             _applicationDbContext = applicationDbContext;
             Mapper = mapper;
         }
@@ -20,15 +23,9 @@ namespace ContactsApi.Controllers
         {
             var identity = User.Identity as ClaimsIdentity;
             var identityClaim = identity?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            return _applicationDbContext.Users.FirstOrDefault(u => u.Id == identityClaim.Value)?.Id;
+            return  _applicationDbContext.GetUserId(identityClaim?.Value);
         }
 
-        public virtual string CurrentUserId
-        {
-            get
-            {
-                return GetCurrentUser();
-            }
-        }
+        public  virtual string CurrentUserId => GetCurrentUser();
     }
 }

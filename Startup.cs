@@ -28,6 +28,8 @@ namespace ContactsApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+            services.AddScoped<IContactContext, ContactContext>();
             services.AddDbContext<ApplicationDbContext>(options =>
                                                             options.UseSqlServer(
                                                                 Configuration.GetConnectionString("DefaultConnection")));
