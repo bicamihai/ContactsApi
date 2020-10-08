@@ -26,11 +26,13 @@ namespace ContactsApi.Data
             modelBuilder.Entity<ContactSkill>()
                         .HasOne(bc => bc.Contact)
                         .WithMany(b => b.ContactSkills)
-                        .HasForeignKey(bc => bc.ContactId);
+                        .HasForeignKey(bc => bc.ContactId)
+                        .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ContactSkill>()
                         .HasOne(bc => bc.Skill)
                         .WithMany(c => c.ContactSkills)
-                        .HasForeignKey(bc => bc.SkillId);
+                        .HasForeignKey(bc => bc.SkillId)
+                        .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SkillLevel>()
                         .HasData(new List<SkillLevel>

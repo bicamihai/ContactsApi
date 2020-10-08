@@ -43,10 +43,9 @@ namespace ContactsApi.Tests
         public async Task GetContacts_ReturnsOnlyLoggedInUserContacts()
         {
             var response = await _sut.Object.GetContacts();
+
             Assert.Single(response.Value);
-            Assert.Equal(response.Value.FirstOrDefault()
-                                 ?.Id,
-                         FixtureBase.ContactIdForLoggedInUser);
+            Assert.Equal(response.Value.FirstOrDefault()?.Id, FixtureBase.ContactIdForLoggedInUser);
         }
 
         [Fact]
@@ -67,13 +66,11 @@ namespace ContactsApi.Tests
         public async Task GetContactSkills_ReturnsCorrectSkillsForContact()
         {
             var response = await _sut.Object.GetContactSkills(FixtureBase.ContactIdForLoggedInUser);
-            var resultList = response.Value.Select(x => x.SkillId)
-                                     .ToList();
-            var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId };
 
-            var areEquivalent = resultList.Count == databaseList.Count &&
-                !resultList.Except(databaseList)
-                           .Any();
+            var resultList = response.Value.Select(x => x.SkillId).ToList();
+            var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId };
+            var areEquivalent = resultList.Count == databaseList.Count && !resultList.Except(databaseList).Any();
+
             Assert.True(areEquivalent);
         }
 
@@ -105,7 +102,9 @@ namespace ContactsApi.Tests
             {
                 Id = FixtureBase.ContactIdNotInDatabase
             };
+
             var response = await _sut.Object.PutContact(contactModel);
+
             Assert.IsType<NotFoundObjectResult>(response);
         }
 
@@ -116,7 +115,9 @@ namespace ContactsApi.Tests
             {
                 Id = FixtureBase.ContactIdForNotLoggedInUser
             };
+
             var response = await _sut.Object.PutContact(contactModel);
+
             Assert.IsType<NotFoundObjectResult>(response);
         }
 
@@ -124,6 +125,7 @@ namespace ContactsApi.Tests
         public async Task PutContact_CorrectlyUpdatesFieldsInDatabase()
         {
             var response = await _sut.Object.PutContact(_contactModel);
+
             var dbContact = await _context.Contacts.FindAsync(FixtureBase.ContactIdForLoggedInUser);
 
             Assert.IsType<OkObjectResult>(response);
@@ -138,6 +140,7 @@ namespace ContactsApi.Tests
         public async Task PostContact_CorrectlyAddsContactInDatabase()
         {
             var response = await _sut.Object.PostContact(_contactModel);
+
             var createdContact = (ContactModel) ((CreatedAtActionResult) response.Result).Value;
             var dbContact = await _context.Contacts.FindAsync(createdContact.Id);
 
@@ -155,6 +158,7 @@ namespace ContactsApi.Tests
         public async Task PostContact_CorrectlySetsTheCurrentLoggedInUserId()
         {
             var response = await _sut.Object.PostContact(_contactModel);
+
             var createdContact = (ContactModel) ((CreatedAtActionResult) response.Result).Value;
             var dbContact = await _context.Contacts.FindAsync(createdContact.Id);
 
@@ -172,6 +176,7 @@ namespace ContactsApi.Tests
             await _context.SaveChangesAsync();
 
             var response = await _sut.Object.DeleteContact(dbContact.Id);
+
             Assert.IsType<OkObjectResult>(response);
             Assert.Null(await _context.Contacts.FindAsync(dbContact.Id));
         }
@@ -181,6 +186,31 @@ namespace ContactsApi.Tests
         {
             var response = await _sut.Object.DeleteContact(FixtureBase.ContactIdNotInDatabase);
             Assert.IsType<NotFoundObjectResult>(response);
+        }
+
+        [Fact]
+        public async Task DeleteContact_CascadeDeletesAllRElatedContactSkill()
+        {
+            var dbContact = new Contact();
+            await _context.Contacts.AddAsync(dbContact);
+            await _context.ContactSkills.AddAsync(new ContactSkill
+            {
+                Contact = dbContact,
+                SkillId = FixtureBase.DrinkingBeerSkillId,
+                SkillLevel = new SkillLevel()
+            });
+            await _context.ContactSkills.AddAsync(new ContactSkill
+            {
+                Contact = dbContact,
+                SkillId = FixtureBase.RidingBikeSkillId,
+                SkillLevel = new SkillLevel()
+            });
+            await _context.SaveChangesAsync();
+
+            await _sut.Object.DeleteContact(dbContact.Id);
+
+            Assert.Null(_context.ContactSkills.FirstOrDefault(x=>x.SkillId == FixtureBase.DrinkingBeerSkillId && x.ContactId == dbContact.Id));
+            Assert.Null(_context.ContactSkills.FirstOrDefault(x => x.SkillId == FixtureBase.RidingBikeSkillId && x.ContactId == dbContact.Id));
         }
     }
 }

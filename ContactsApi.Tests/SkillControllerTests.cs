@@ -33,21 +33,18 @@ namespace ContactsApi.Tests
             var mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile())));
             _context = fixture.ContactContext;
             _sut = new Mock<SkillsController>(fixture.ContactContext, fixture.ApplicationDbContext, mapper) { CallBase = true };
-            _sut.SetupGet(x => x.CurrentUserId)
-                .Returns(FixtureBase.LoggedInUserId);
+            _sut.SetupGet(x => x.CurrentUserId).Returns(FixtureBase.LoggedInUserId);
         }
 
         [Fact]
         public async Task GetSkills_CorrectlyReturnsAllSkillFromDatabase()
         {
             var response = await _sut.Object.GetSkills();
-            var resultList = response.Value.Select(x => x.Id)
-                                     .ToList();
-            var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId, FixtureBase.RidingBikeSkillId };
 
-            var areEquivalent = resultList.Count == databaseList.Count &&
-                !resultList.Except(databaseList)
-                           .Any();
+            var resultList = response.Value.Select(x => x.Id).ToList();
+            var databaseList = new List<int> { FixtureBase.DrinkingBeerSkillId, FixtureBase.RidingBikeSkillId };
+            var areEquivalent = resultList.Count == databaseList.Count && !resultList.Except(databaseList).Any();
+
             Assert.True(areEquivalent);
         }
 
@@ -73,6 +70,7 @@ namespace ContactsApi.Tests
                 Id = FixtureBase.SkillIdNotInDatabase
             };
             var response = await _sut.Object.PutSkill(skillModel);
+
             Assert.IsType<NotFoundObjectResult>(response);
         }
 
@@ -96,7 +94,6 @@ namespace ContactsApi.Tests
 
             Assert.Equal(_skillModel.Name, dbSkill.Name);
             Assert.Equal(_skillModel.SkillCode, dbSkill.SkillCode);
-
 
             _context.Skills.Remove(dbSkill);
             await _context.SaveChangesAsync();
@@ -218,7 +215,6 @@ namespace ContactsApi.Tests
         {
             var response = await _sut.Object.UpdateSkillForContact(FixtureBase.DrinkingBeerSkillId, FixtureBase.ContactIdForLoggedInUser, FixtureBase.AdvancedSkillLevelCode);
 
-
             var contactSkill = await _context.ContactSkills.Where(x => x.ContactId == FixtureBase.ContactIdForLoggedInUser &&
                                                                       x.SkillId == FixtureBase.DrinkingBeerSkillId &&
                                                                       x.SkillLevel.LevelCode == FixtureBase.AdvancedSkillLevelCode).FirstOrDefaultAsync();
@@ -227,6 +223,24 @@ namespace ContactsApi.Tests
             Assert.Equal(contactSkill.SkillLevel.LevelCode, FixtureBase.AdvancedSkillLevelCode);
             _context.Remove(contactSkill);
             await _context.SaveChangesAsync();
+        }
+
+        [Fact]
+        public async Task DeleteSkill_CascadeDeletesAllRelatedContactSkill()
+        {
+            var dbSkill = new Skill();
+            await _context.Skills.AddAsync(dbSkill);
+            await _context.ContactSkills.AddAsync(new ContactSkill
+            {
+                ContactId = FixtureBase.ContactIdForLoggedInUser,
+                Skill = dbSkill,
+                SkillLevel = new SkillLevel()
+            });
+            await _context.SaveChangesAsync();
+
+            await _sut.Object.DeleteSkill(dbSkill.Id);
+
+            Assert.Null(_context.ContactSkills.FirstOrDefault(x => x.SkillId == dbSkill.Id && x.ContactId == FixtureBase.ContactIdForLoggedInUser));
         }
     }
 }
