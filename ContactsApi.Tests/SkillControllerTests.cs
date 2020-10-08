@@ -224,7 +224,7 @@ namespace ContactsApi.Tests
                                                                       x.SkillLevel.LevelCode == FixtureBase.AdvancedSkillLevelCode).FirstOrDefaultAsync();
             Assert.IsType<OkObjectResult>(response);
             Assert.NotNull(contactSkill);
-
+            Assert.Equal(contactSkill.SkillLevel.LevelCode, FixtureBase.AdvancedSkillLevelCode);
             _context.Remove(contactSkill);
             await _context.SaveChangesAsync();
         }

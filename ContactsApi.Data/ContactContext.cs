@@ -109,7 +109,7 @@ namespace ContactsApi.Data
             return await base.SaveChangesAsync();
         }
 
-        public async Task<ContactSkill> GetContactSkillAsync(int skillId, int contactId)
+        public async Task<ContactSkill> GetContactSkillAsync(int contactId, int skillId)
         {
             return await ContactSkills.FirstOrDefaultAsync(x => x.SkillId == skillId && x.ContactId == contactId);
         }
@@ -144,10 +144,9 @@ namespace ContactsApi.Data
             return await Contacts.Where(c => c.UserId == userId).ToListAsync();
         }
 
-        public async Task<List<ContactSkill>> GetContactSkills(int contactId, string userId)
+        public async Task<List<ContactSkill>> GetContactSkillsAsync(int contactId)
         {
-            return await ContactSkills.Include(x => x.Contact)
-                                      .Where(c => c.ContactId == contactId && c.Contact.UserId == userId)
+            return await ContactSkills.Where(c => c.ContactId == contactId)
                                       .Include(x => x.Skill)
                                       .Include(x => x.SkillLevel)
                                       .ToListAsync();

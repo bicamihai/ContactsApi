@@ -52,7 +52,7 @@ namespace ContactsApi.Controllers
             {
                 return NotFound(Resources.ContactNotFound);
             }
-            var contactSkills = await Context.GetContactSkills(contactId, CurrentUserId);
+            var contactSkills = await Context.GetContactSkillsAsync(contactId);
             var returnList = Mapper.Map<IEnumerable<ContactSkillModel>>(contactSkills);
             return new ActionResult<IEnumerable<ContactSkillModel>>(returnList);
         }

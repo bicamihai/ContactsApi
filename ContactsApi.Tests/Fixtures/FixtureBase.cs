@@ -19,16 +19,16 @@ namespace ContactsApi.Tests.Fixtures
         #endregion
 
         #region skills
-        public const int DrinkingBeerSkillId = 1;
-        public const int RidingBikeSkillId = 2;
-        internal static readonly int SkillIdNotInDatabase = 3;
+        public const int DrinkingBeerSkillId = 10;
+        public const int RidingBikeSkillId = 12;
+        internal static readonly int SkillIdNotInDatabase = 13;
         #endregion
 
         #region skill level
-        public const int NoobSkillLevelCode = 1;
-        public const int IntermediateSkillLevelCode = 2;
-        public const int AdvancedSkillLevelCode = 3;
-        public const int NotInDatabaseSkillLevelCode = 10;
+        public const int NoobSkillLevelCode = 111;
+        public const int IntermediateSkillLevelCode = 112;
+        public const int AdvancedSkillLevelCode = 113;
+        public const int NotInDatabaseSkillLevelCode = 1110;
         #endregion
 
         public ApplicationDbContext ApplicationDbContext { get; set; }

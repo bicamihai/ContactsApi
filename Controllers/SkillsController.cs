@@ -136,7 +136,7 @@ namespace ContactsApi.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> AddSkillToContact(int skillId, int contactId, int skillLevelCode)
         {
-            var contactSkill =await  Context.GetContactSkillAsync(skillId, contactId);
+            var contactSkill =await  Context.GetContactSkillAsync(contactId, skillId);
             if (contactSkill != null)  
             {
                 return BadRequest(Resources.ContactSkillExists);
@@ -206,7 +206,7 @@ namespace ContactsApi.Controllers
                 return NotFound(Resources.SkillLevelNotFound);
             }
 
-            var existingSkill = await Context.GetContactSkillAsync(skillId, contactId);
+            var existingSkill = await Context.GetContactSkillAsync(contactId, skillId);
             if (existingSkill == null)
             {
                 return NotFound(Resources.ContactSkillNotFound);
