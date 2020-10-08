@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ContactsApi.Data;
 using ContactsApi.Mappings;
 using ContactsApi.Middleware;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,10 +37,9 @@ namespace ContactsApi
             services.AddDbContext<ContactContext>(options =>
                                                       options.UseSqlServer(
                                                           Configuration.GetConnectionString("DefaultConnection")));
-            services.AddControllers();
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-
+            services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
@@ -62,6 +63,30 @@ namespace ContactsApi
 
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
+            services.ConfigureApplicationCookie(o =>
+            {
+                o.Events = new CookieAuthenticationEvents()
+                {
+                    OnRedirectToLogin = (ctx) =>
+                    {
+                        if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                        {
+                            ctx.Response.StatusCode = 401;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                    OnRedirectToAccessDenied = (ctx) =>
+                    {
+                        if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                        {
+                            ctx.Response.StatusCode = 403;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
         }
 
@@ -91,7 +116,6 @@ namespace ContactsApi
             }
 
            
-            //app.UseMiddleware<ApiExceptionMiddleware>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

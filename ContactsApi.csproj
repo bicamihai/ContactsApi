@@ -30,10 +30,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="StartupConfig\" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="ContactsApi.Data\ContactsApi.Data.csproj" />
     </ItemGroup>
 
@@ -50,6 +46,10 @@
             <Generator>PublicResXFileCodeGenerator</Generator>
             <LastGenOutput>Resources.Designer.cs</LastGenOutput>
         </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="StartupConfig\" />
     </ItemGroup>
 
 </Project>
