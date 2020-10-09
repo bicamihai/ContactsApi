@@ -60,19 +60,16 @@ namespace ContactsApi.Data
                             {
                                 Id = 1,
                                 Name = "DrinkingBeer",
-                                SkillCode = 1
                             },
                             new Skill
                             {
                                 Id = 2,
                                 Name = "RidingBike",
-                                SkillCode = 2
                             },
                             new Skill
                             {
                                 Id = 3,
                                 Name = "SingingKaraoke",
-                                SkillCode = 3
                             }
                         });
         }

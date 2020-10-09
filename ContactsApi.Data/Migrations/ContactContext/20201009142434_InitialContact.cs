@@ -44,7 +44,6 @@ namespace ContactsApi.Data.Migrations.ContactContext
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SkillCode = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -95,12 +94,12 @@ namespace ContactsApi.Data.Migrations.ContactContext
 
             migrationBuilder.InsertData(
                 table: "Skills",
-                columns: new[] { "Id", "Name", "SkillCode" },
+                columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
-                    { 1, "DrinkingBeer", 1 },
-                    { 2, "RidingBike", 2 },
-                    { 3, "SingingKaraoke", 3 }
+                    { 1, "DrinkingBeer" },
+                    { 2, "RidingBike" },
+                    { 3, "SingingKaraoke" }
                 });
 
             migrationBuilder.CreateIndex(

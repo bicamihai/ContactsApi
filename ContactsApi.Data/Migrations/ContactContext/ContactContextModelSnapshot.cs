@@ -76,9 +76,6 @@ namespace ContactsApi.Data.Migrations.ContactContext
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SkillCode")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Skills");
@@ -87,20 +84,17 @@ namespace ContactsApi.Data.Migrations.ContactContext
                         new
                         {
                             Id = 1,
-                            Name = "DrinkingBeer",
-                            SkillCode = 1
+                            Name = "DrinkingBeer"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "RidingBike",
-                            SkillCode = 2
+                            Name = "RidingBike"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "SingingKaraoke",
-                            SkillCode = 3
+                            Name = "SingingKaraoke"
                         });
                 });
 

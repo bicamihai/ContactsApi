@@ -25,7 +25,6 @@ namespace ContactsApi.Tests
         {
             Name = "TestSkill",
             Id = FixtureBase.DrinkingBeerSkillId,
-            SkillCode = 9
         };
 
         public SkillControllerTests(SkillFixture fixture)
@@ -82,7 +81,6 @@ namespace ContactsApi.Tests
 
             Assert.IsType<OkObjectResult>(response);
             Assert.Equal(_skillModel.Name, dbContact.Name);
-            Assert.Equal(_skillModel.SkillCode, dbContact.SkillCode);
         }
 
         [Fact]
@@ -93,7 +91,6 @@ namespace ContactsApi.Tests
             var dbSkill = await _context.Skills.FindAsync(createdSkill.Id);
 
             Assert.Equal(_skillModel.Name, dbSkill.Name);
-            Assert.Equal(_skillModel.SkillCode, dbSkill.SkillCode);
 
             _context.Skills.Remove(dbSkill);
             await _context.SaveChangesAsync();
