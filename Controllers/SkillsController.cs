@@ -146,7 +146,6 @@ namespace ContactsApi.Controllers
             {
                 return NotFound(Resources.SkillNotFound);
             }
-
             var skillLevel = await Context.GetSkillLevelAsync(skillLevelCode);
             if (skillLevel == null)
             {
@@ -154,18 +153,14 @@ namespace ContactsApi.Controllers
             }
 
             var contact = await Context.GetContactAsync(contactId);
-            if (contact == null)
-            {
-                return NotFound(Resources.ContactNotFound);
-            }
-            if (contact.UserId != CurrentUserId)
+            if (contact == null || contact.UserId != CurrentUserId)
             {
                 return NotFound(Resources.ContactNotFound);
             }
             contactSkill = new ContactSkill
             {
-                ContactId = contactId,
-                SkillId = skillId,
+                Contact = contact,
+                Skill = skill,
                 SkillLevel = skillLevel
             };
             await Context.AddContactSkillsAsync(contactSkill);
@@ -179,7 +174,7 @@ namespace ContactsApi.Controllers
         /// </summary>
         /// <param name="skillId">The skill</param> <param name="contactId">The contact</param> <param name="skillLevelCode">The code of the skill level</param>
         /// <response code="200">Skill for contact was successfully updated.</response>
-        /// <response code="404">Skill for Contact or Skil level was not found</response>
+        /// <response code="404">Skill for contact or skill level was not found</response>
         [HttpPut("/api/UpdateSkillForContact")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -191,21 +186,15 @@ namespace ContactsApi.Controllers
                 return NotFound(Resources.SkillNotFound);
             }
             var contact = await Context.GetContactAsync(contactId);
-            if (contact == null)
+            if (contact == null || contact.UserId != CurrentUserId)
             {
                 return NotFound(Resources.ContactNotFound);
             }
-            if (contact.UserId != CurrentUserId)
-            {
-                return NotFound(Resources.ContactNotFound);
-            }
-
             var skillLevel = await Context.GetSkillLevelAsync(skillLevelCode);
             if (skillLevel == null)
             {
                 return NotFound(Resources.SkillLevelNotFound);
             }
-
             var existingSkill = await Context.GetContactSkillAsync(contactId, skillId);
             if (existingSkill == null)
             {
@@ -234,7 +223,7 @@ namespace ContactsApi.Controllers
                 return NotFound(Resources.SkillNotFound);
             }
 
-            Context.Remove<Skill>(skill);
+            Context.Remove(skill);
             await Context.SaveChangesAsync();
 
             return Ok(Resources.SkillRemoved);

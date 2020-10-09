@@ -49,20 +49,17 @@ namespace ContactsApi
                     Version = "v1",
                     Description = "It's a simple API, where a user can get a quick overview over all contacts resources like person, skills..."
                 });
-
-                // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-            //mapper
-            var mapperConfig = new MapperConfiguration(mc =>
+
+            services.AddSingleton(new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MappingProfile());
-            });
+            }).CreateMapper());
 
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            // serve 401 Unauthorised instead of html for login
             services.ConfigureApplicationCookie(o =>
             {
                 o.Events = new CookieAuthenticationEvents()
@@ -90,22 +87,19 @@ namespace ContactsApi
 
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
-
             app.UseExceptionHandler(new ExceptionHandlerOptions
             {
-                ExceptionHandler = new JsonExceptionMiddleware(logger).Invoke
+                ExceptionHandler = new ExceptionMiddleware(logger).Invoke
             });
 
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Contacts Api");
             });
-
             
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
@@ -114,7 +108,6 @@ namespace ContactsApi
                 applicationContext.Database.EnsureCreated();
                 contactsContext.Database.Migrate();
             }
-
            
             app.UseHttpsRedirection();
             app.UseStaticFiles();

@@ -10,12 +10,16 @@
     <ItemGroup>
         <Compile Remove="ContactsApi.Data\**" />
         <Compile Remove="ContactsApi.Tests\**" />
+        <Compile Remove="packages\**" />
         <Content Remove="ContactsApi.Data\**" />
         <Content Remove="ContactsApi.Tests\**" />
+        <Content Remove="packages\**" />
         <EmbeddedResource Remove="ContactsApi.Data\**" />
         <EmbeddedResource Remove="ContactsApi.Tests\**" />
+        <EmbeddedResource Remove="packages\**" />
         <None Remove="ContactsApi.Data\**" />
         <None Remove="ContactsApi.Tests\**" />
+        <None Remove="packages\**" />
     </ItemGroup>
 
     <ItemGroup>

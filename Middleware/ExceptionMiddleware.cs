@@ -10,10 +10,10 @@ using Newtonsoft.Json;
 
 namespace ContactsApi.Middleware
 {
-    public class JsonExceptionMiddleware
+    public class ExceptionMiddleware
     {
         private readonly ILogger _logger;
-        public JsonExceptionMiddleware(ILogger logger)
+        public ExceptionMiddleware(ILogger logger)
         {
             _logger = logger;
         }

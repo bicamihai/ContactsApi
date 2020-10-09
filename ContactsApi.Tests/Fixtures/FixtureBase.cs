@@ -63,7 +63,7 @@ namespace ContactsApi.Tests.Fixtures
                 FirstName = "Madalina",
                 LastName = "Bica",
                 Address = "Paris",
-                Email = "mihai@yahoo.com",
+                Email = "mada@yahoo.com",
                 MobilePhoneNumber = "+40743654321",
                 UserId = AnotherUserId
             });
@@ -109,7 +109,6 @@ namespace ContactsApi.Tests.Fixtures
         public void Dispose()
         {
             ApplicationDbContext.Database.EnsureDeleted();
-            ContactContext.Database.EnsureDeleted();
             ApplicationDbContext.Dispose();
             ContactContext.Dispose();
         }

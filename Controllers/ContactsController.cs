@@ -30,15 +30,15 @@ namespace ContactsApi.Controllers
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
         {
             var contacts = await Context.GetContactsForUserAsync(CurrentUserId);
-            var contactsDto = Mapper.Map<IEnumerable<ContactModel>>(contacts);
-            return new ActionResult<IEnumerable<ContactModel>>(contactsDto);
+            var contactsModel = Mapper.Map<IEnumerable<ContactModel>>(contacts);
+            return new ActionResult<IEnumerable<ContactModel>>(contactsModel);
         }
 
         /// <summary>
         /// Gets all skills with the specific skill level for the specified contact.
         /// </summary>
         /// <param name="contactId">the contact</param>
-        /// <response code="200">Returns all skills with specific skill level for the specified customer.</response>
+        /// <response code="200">Returns all skills with specific skill level for the specified contact.</response>
         /// <response code="404">Contact was not found.</response>
         /// <response code="400">Parameter contactId not a valid int</response> 
         [HttpGet("/api/GetContactSkills")]
@@ -79,7 +79,7 @@ namespace ContactsApi.Controllers
         }
 
         /// <summary>
-        /// Edits details of a specific customer.
+        /// Edits details of a specific contact.
         /// </summary>
         /// <param name="contactModel">Contact model should contain the correct id of the record that needs to be updated</param>
         /// <response code="200">Contact was successfully updated.</response>
@@ -114,7 +114,7 @@ namespace ContactsApi.Controllers
         }
 
         /// <summary>
-        /// Adds a customer for the signed in user.
+        /// Adds a contact for the signed in user.
         /// </summary>
         /// <param name="contactModel">The contactModel to be added, id property is ignored, as it is handled by the database</param>
         /// <response code="200">Contact was successfully added.</response>

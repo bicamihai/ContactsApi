@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ContactsApi.Models
+﻿namespace ContactsApi.Models
 {
     public class SkillLevelModel
     {

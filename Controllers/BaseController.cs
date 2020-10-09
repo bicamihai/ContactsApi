@@ -20,7 +20,7 @@ namespace ContactsApi.Controllers
         }
         private string GetCurrentUser()
         {
-            var identity = User.Identity as ClaimsIdentity;
+            var identity = User?.Identity as ClaimsIdentity;
             var identityClaim = identity?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             return  _applicationDbContext.GetUserId(identityClaim?.Value);
         }
