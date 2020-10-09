@@ -4,7 +4,7 @@ namespace ContactsApi.Models
 {
     public class ContactModel
     {
-        [Range(0, int.MaxValue, ErrorMessage = "Please enter valid integer Number")]
+        [Range(0, int.MaxValue, ErrorMessage = "Please enter a valid integer Number")]
         public int Id { get; set; }
         [Required]
         public string FirstName { get; set; }

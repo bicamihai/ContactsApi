@@ -171,7 +171,10 @@ namespace ContactsApi.Tests
         [Fact]
         public async Task DeleteContact_CorrectlyRemovesTheContactFromTheDatabase()
         {
-            var dbContact = new Contact();
+            var dbContact = new Contact
+            {
+                UserId = FixtureBase.LoggedInUserId
+            };
             await _context.Contacts.AddAsync(dbContact);
             await _context.SaveChangesAsync();
 
@@ -189,9 +192,12 @@ namespace ContactsApi.Tests
         }
 
         [Fact]
-        public async Task DeleteContact_CascadeDeletesAllRElatedContactSkill()
+        public async Task DeleteContact_CascadeDeletesAllRelatedContactSkill()
         {
-            var dbContact = new Contact();
+            var dbContact = new Contact
+            {
+                UserId = FixtureBase.LoggedInUserId
+            };
             await _context.Contacts.AddAsync(dbContact);
             await _context.ContactSkills.AddAsync(new ContactSkill
             {

@@ -25,6 +25,6 @@ namespace ContactsApi.Controllers
             return  _applicationDbContext.GetUserId(identityClaim?.Value);
         }
 
-        public  virtual string CurrentUserId => GetCurrentUser();
+        public virtual string CurrentUserId => GetCurrentUser();
     }
 }

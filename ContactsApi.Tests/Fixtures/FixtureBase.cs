@@ -34,8 +34,6 @@ namespace ContactsApi.Tests.Fixtures
         public ApplicationDbContext ApplicationDbContext { get; set; }
         public ContactContext ContactContext { get; set; }
 
-        
-
         public void SeedTestDb()
         {
             ApplicationDbContext.Users.Add(new IdentityUser()

@@ -24,7 +24,7 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Gets all contacts of signed in user.
         /// </summary>
-        /// <response code="200">Returns all contacts of signed in user</response>
+        /// <response code="200">Returns all contacts of signed in user.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<ContactModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
@@ -37,22 +37,22 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Gets all skills with the specific skill level for the specified contact.
         /// </summary>
-        /// <param name="contactId">the contact</param>
+        /// <param name="id">the contact</param>
         /// <response code="200">Returns all skills with specific skill level for the specified contact.</response>
         /// <response code="404">Contact was not found.</response>
-        /// <response code="400">Parameter contactId not a valid int</response> 
+        /// <response code="400">Parameter id is not a valid int.</response> 
         [HttpGet("/api/GetContactSkills")]
         [ProducesResponseType(typeof(IEnumerable<ContactSkillModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<ContactSkillModel>>> GetContactSkills(int contactId)
+        public async Task<ActionResult<IEnumerable<ContactSkillModel>>> GetContactSkills(int id)
         {
-            var contact = await Context.GetContactAsync(contactId);
+            var contact = await Context.GetContactAsync(id);
             if (contact == null || contact.UserId != CurrentUserId)
             {
                 return NotFound(Resources.ContactNotFound);
             }
-            var contactSkills = await Context.GetContactSkillsAsync(contactId);
+            var contactSkills = await Context.GetContactSkillsAsync(id);
             var returnList = Mapper.Map<IEnumerable<ContactSkillModel>>(contactSkills);
             return new ActionResult<IEnumerable<ContactSkillModel>>(returnList);
         }
@@ -63,7 +63,7 @@ namespace ContactsApi.Controllers
         /// <param name="id">the contact</param>
         /// <response code="200">Returns contact details.</response>
         /// <response code="404">Contact was not found.</response>
-        /// <response code="400">Parameter contactId not a valid int</response> 
+        /// <response code="400">Parameter id is not a valid int.</response> 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ContactModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -81,10 +81,10 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Edits details of a specific contact.
         /// </summary>
-        /// <param name="contactModel">Contact model should contain the correct id of the record that needs to be updated</param>
+        /// <param name="contactModel">Contact model should contain the correct id of the record that needs to be updated.</param>
         /// <response code="200">Contact was successfully updated.</response>
         /// <response code="404">Contact was not found.</response>
-        /// <response code="400">Validation errors for contact fields</response> 
+        /// <response code="400">Validation errors for contact fields.</response> 
         [HttpPut]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -116,9 +116,9 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Adds a contact for the signed in user.
         /// </summary>
-        /// <param name="contactModel">The contactModel to be added, id property is ignored, as it is handled by the database</param>
+        /// <param name="contactModel">The contactModel to be added. Id property is ignored, as it is handled by the database.</param>
         /// <response code="200">Contact was successfully added.</response>
-        /// <response code="400">Validation errors for contact fields</response> 
+        /// <response code="400">Validation errors for contact fields.</response> 
         [HttpPost]
         [ProducesResponseType(typeof(ContactModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -136,10 +136,10 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Deletes a specific Contact.
         /// </summary>
-        /// <param name="id">The contact to be removed</param>
+        /// <param name="id">The contact to be removed.</param>
         /// <response code="200">Contact was successfully updated.</response>
         /// <response code="404">Contact was not found.</response>
-        /// <response code="400">Parameter contactId not a valid int</response> 
+        /// <response code="400">Parameter id is not a valid int.</response> 
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -147,7 +147,7 @@ namespace ContactsApi.Controllers
         public async Task<ActionResult> DeleteContact(int id)
         {
             var contact = await Context.GetContactAsync(id);
-            if (contact == null)
+            if (contact == null || contact.UserId != CurrentUserId)
             {
                 return NotFound(Resources.ContactNotFound);
             }

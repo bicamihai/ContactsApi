@@ -23,7 +23,7 @@ namespace ContactsApi.Middleware
             var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
             if (contextFeature?.Error != null)
             {
-                _logger.LogError(contextFeature.Error, contextFeature.Error.Message);
+                _logger.LogError(contextFeature.Error, $"{contextFeature.Error.Message} TraceId: {context.TraceIdentifier}");
                 context.Response.StatusCode = (int)GetErrorCode(contextFeature.Error);
                 context.Response.ContentType = "application/json";
 

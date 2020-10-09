@@ -24,7 +24,7 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Gets a list of all skills in the database.
         /// </summary>
-        /// <response code="200">Returns a list of all skills in the database</response>
+        /// <response code="200">Returns a list of all skills in the database.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<SkillModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<SkillModel>>> GetSkills()
@@ -34,10 +34,10 @@ namespace ContactsApi.Controllers
         }
 
         /// <summary>
-        /// Gets a list of all skills levels in the database.
-        /// The skill levels are seed data, therefore, they cannot be edited
+        /// Gets a list of all skill levels in the database.
+        /// The skill levels are seed data, therefore, they cannot be edited.
         /// </summary>
-        /// <response code="200">Returns a list of all skill levels in the database</response>
+        /// <response code="200">Returns a list of all skill levels in the database.</response>
         [HttpGet("/api/GetSkillLevels")]
         [ProducesResponseType(typeof(IEnumerable<SkillLevelModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<SkillLevelModel>>> GetSkillLevels()
@@ -49,10 +49,10 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Gets a specific skill.
         /// </summary>
-        /// <param name="id">The id of the skill</param>
+        /// <param name="id">The id of the skill.</param>
         /// <response code="200">Returns specific skill details.</response>
         /// <response code="404">Skill was not found.</response>
-        /// <response code="400">Parameter id not a valid int</response>  
+        /// <response code="400">Parameter id is not a valid int.</response>  
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(SkillModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -60,7 +60,6 @@ namespace ContactsApi.Controllers
         public async Task<ActionResult<SkillModel>> GetSkill(int id)
         {
             var skill = await Context.GetSkillAsync(id);
-
             if (skill == null)
             {
                 return NotFound(Resources.SkillNotFound);
@@ -72,10 +71,10 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Edits the details of a specific skill.
         /// </summary>
-        /// <param name="skillModel">Skill model should contain the correct id of the record that needs to be updated</param>
+        /// <param name="skillModel">The skill model should contain the correct id of the record that needs to be updated.</param>
         /// <response code="200">Skill was successfully updated.</response>
         /// <response code="404">Skill was not found.</response>
-        /// <response code="400">Validation errors for skill fields</response> 
+        /// <response code="400">Validation errors for skill fields.</response> 
         [HttpPut]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -106,9 +105,9 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Adds a skill.
         /// </summary>
-        /// <param name="skillModel">Skill model to be added. Id property can be ignored on this request as it is handled by the database</param>
+        /// <param name="skillModel">The skill model to be added. Id property can be ignored on this request as it is handled by the database.</param>
         /// <response code="200">Skill was successfully added.</response>
-        /// <response code="400">Validation errors for skill fields</response> 
+        /// <response code="400">Validation errors for skill fields.</response> 
         [HttpPost]
         [ProducesResponseType(typeof(SkillModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -127,8 +126,8 @@ namespace ContactsApi.Controllers
         /// </summary>
         /// <param name="skillId">The skill</param> <param name="contactId">The contact</param> <param name="skillLevelCode">The code of the skill level</param>
         /// <response code="200">Skill for Contact was successfully added.</response>
-        /// <response code="404">Skill, Contact or Skill level not found</response>
-        /// <response code="400">The specified skill for the specified contact already exists, use PUT method if you want to update</response>
+        /// <response code="404">Skill, Contact or Skill level was not found.</response>
+        /// <response code="400">The specified skill for the specified contact already exists, use PUT method if you want to update.</response>
 
         [HttpPost("/api/AddSkillToContact")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -151,7 +150,6 @@ namespace ContactsApi.Controllers
             {
                 return NotFound(Resources.SkillLevelNotFound);
             }
-
             var contact = await Context.GetContactAsync(contactId);
             if (contact == null || contact.UserId != CurrentUserId)
             {
@@ -174,7 +172,7 @@ namespace ContactsApi.Controllers
         /// </summary>
         /// <param name="skillId">The skill</param> <param name="contactId">The contact</param> <param name="skillLevelCode">The code of the skill level</param>
         /// <response code="200">Skill for contact was successfully updated.</response>
-        /// <response code="404">Skill for contact or skill level was not found</response>
+        /// <response code="404">Skill, Contact or Skill level was not found.</response>
         [HttpPut("/api/UpdateSkillForContact")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -209,9 +207,9 @@ namespace ContactsApi.Controllers
         /// <summary>
         /// Removes a skill.
         /// </summary>
-        /// <param name="id">Id of the skill to be removed</param>
-        /// <response code="200">Skill was successfully removed</response>
-        /// <response code="404">Skill was not found</response>
+        /// <param name="id">The id of the skill to be removed.</param>
+        /// <response code="200">The skill was successfully removed.</response>
+        /// <response code="404">The skill was not found.</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
